@@ -23,3 +23,5 @@ class Review(BaseModel, Base):
     product_id = Column(String(60), ForeignKey('products.id'), nullable=False)
     customer_id = Column(String(60), ForeignKey('customers.id'), nullable=False)
     rate = Column(Float, default=0.0)
+    
+

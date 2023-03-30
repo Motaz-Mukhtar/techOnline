@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-"""Create Customer Class"""
 from modules.baseModel import BaseModel
 from modules.baseModel import Base
 from sqlalchemy import Column
@@ -22,7 +20,7 @@ class Customer(BaseModel, Base):
     __tablename__ = 'customers'
     first_name = Column(String(128), nullable=False)
     last_name = Column(String(128), nullable=False)
-    email = Column(String(128), nullable=False)
+    email = Column(String(128), nullable=False, unique=True)
     password = Column(String(128), nullable=False)
     # must put 'default' attribute as an default image for customer
     profile_avatar = Column(String(128), default="")

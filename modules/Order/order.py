@@ -16,7 +16,7 @@ class Order(BaseModel, Base):
             cart_id(str): String(60) ForeginKey for carts.id and can't be null
     """
     __tablename__ = 'orders'
-    customer_id = Column(String(60), ForeignKey('customer.id'), nullable=False)
+    customer_id = Column(String(60), ForeignKey('customers.id'), nullable=False)
     cart_id = Column(String(60), ForeignKey('carts.id'))
 
 
