@@ -1,10 +1,9 @@
-#!/usr/bin/python3
-"""Create DBStorage Class"""
-from modules.customer import Customer
-from modules.cart import Cart
-from modules.order import Order
-from modules.product import Product
-from modules.review import Review
+
+from modules.Customer.customer import Customer
+from modules.Cart.cart import Cart
+from modules.Order.order import Order
+from modules.Products.product import Product
+from modules.Review.review import Review
 from modules.baseModel import Base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine

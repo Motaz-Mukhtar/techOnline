@@ -29,3 +29,6 @@ class Product(BaseModel, Base):
     image = Column(String(128))
     # category_id  = Column(String(60), ForeignKey('categories.id'), nullable=False)
     customer_id = Column(String(60), ForeignKey('customers.id'), nullable=False)
+    
+    
+    
