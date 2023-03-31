@@ -1,1 +1,99 @@
-shop home page
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
+    <!-- Font Awesome Library -->
+    <link rel="stylesheet" href="{{url_for('static', filename='css/all.min.css')}}">
+    <title>techOnline | Home</title>
+</head>
+<body>
+    <nav>
+        <h1>tech<span>O</span>nline</h1>
+        <ul>
+            <li><a href="{{url_for('home')}}">Home</a></li>
+            <li><a href="{{url_for('login')}}">Log in</a></li>
+            <li><a href="">About</a></li>
+            <li class="button"><a href="{{url_for('signup')}}">Sign up</a></li>
+        </ul>
+    </nav>
+    <header>
+        <div>
+            <h1>The Home Of Tech Products</h1>
+            <p>Customers Can showcase there tech Products to potential buyers.
+            </p>
+            <button><a href="#">Show Your Product</a></button>
+        </div>
+        <div>
+            <img src="{{url_for('static', filename='images/dvices.png')}}" alt="Devices">
+        </div>
+    </header>
+    <section class="features">
+        <div>
+            <i class="fas fa-cart-plus"></i>
+            <div>
+                <h3>Shop the Best Deals on Tech</h3>
+                <p>Find amazing deals on laptops, smartphones, tablets, and other gadgets you love.</p>
+            </div>
+        </div>
+        <div>
+            <i class="fas fa-user-lock"></i>
+            <div>
+                <h3>Fast & Secure Checkout</h3>
+                <p>Our checkout process is quick and secure, so you can enjoy your new tech products as soon as possible.</p>
+            </div>
+        </div>
+        <div>
+            <i class="fas fa-check-circle"></i>
+            <div>
+                <h3>Better Customer Experience</h3>
+                <p>Offers convenience and flexiblity, allowing customers to browse, fast and easy search .</p>
+            </div>
+        </div>
+        <div class="img-container">
+            <img src="{{url_for('static', filename='images/mobile.png')}}" alt="mobiles">
+        </div>
+    </section>
+    <!-- Somewhere following the feature section, include an About section.
+
+    This about section needs to include:
+    
+    A description of what inspired the project. Make this is a personal story, and not “because Holberton required this project”.
+    It is reasonable to include the timeline, and feel free to also mention this is a Portfolio Project for Holberton School with a link.
+    Links to each team member’s LinkedIn, github and Twitter profile
+
+    A link to the github repository for the project -->
+    <section class="about">
+        <div class="text">
+            <h1>What Inspired This Project:</h1>
+            <p>
+                To sell products or services online. By setting up an online store, and to stay competitve, In today's
+                digital age, busniessea that don't have an online presence ris falling behind their competitors, Developing
+                an e-commerce store can help businesse stay relevan and competitve in the marketplace, and also cuase it
+                an portofolio project for Holberton School.
+            </p>
+            <h3>Who Develop This Project:</h3>
+        </div>
+        <div class="members">
+            <div class="first">
+                <img src="{{url_for('static', filename='images/hFna7--L_400x400.jpg')}}" alt="First Member">
+                <h1>Motaz Hassan</h1>
+                <a href="https://www.github.com/Motaz-Mukhtar" target="_blank"><i class="fab fa-github"></i></a>
+                <a href="https://www.linkedin.com/in/motaz-mukhtar-292249258/" target="_blank"><i class="fab fa-linkedin"></i></a>
+                <a href="https;//twitter.com/motaz_mukhtar/" target="_blank"><i class="fab fa-twitter"></i></a>
+            </div>
+            <div class="first">
+                <img src="{{url_for('static', filename='images/T0195LMKD1R-U03J3GLEKR9-5e9f91a8ebd5-512.jpg')}}" alt="Second Member">
+                <h1>Adel Mikhael</h1>
+                <a href="https://github.com/am2011" target="_blank"><i class="fab fa-github"></i></a>
+                <a href="http://www.linkedin.com/in/adel-atef-mikhael-569432209" target="_blank"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+        <div class="repo-container">
+            <a href="https://github.com/Motaz-Mukhtar/techOnline" target="_blank"><button>Project Repository</button></a>
+        </div>
+    </section>
+</body>
+</html>

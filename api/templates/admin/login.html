@@ -1,28 +1,39 @@
-{% extends "layout.html" %}
-
-{% block content%}
-<div class="container">
-    <div class="row">
-        <div class="col-md-3"></div>
-        <div class="col-md-6">
-            <div class="text-center bg-info p-2 h4">Login</div>
-            {% from "_formhelpers.html" import render_field %}
-            {% include '_messages.html' %}
-            <form method=post>
-                {{form.csrf_token}}
-                <div>
-                    {{ render_field(form.email, class="form-control") }}
-                    {{ render_field(form.password, class="form-control") }}
-                </div>
-                <p><input type="submit" value="Login" class="btn-info">
-
-            </form>
-            <a href={{url_for("signup")}}>if you donot have account please signup</a>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/login.css')}}">
+</head>
+<body>
+    {% extends "layout.html" %}
+    
+    {% block content%}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6 login-container">
+                <h4 class="text-center p-2 h4">Login</h4>
+                {% from "_formhelpers.html" import render_field %}
+                {% include '_messages.html' %}
+                <form method=post>
+                    {{form.csrf_token}}
+                    <div>
+                        {{ render_field(form.email, class="form-control") }}
+                        {{ render_field(form.password, class="form-control") }}
+                    </div>
+                    <p><input type="submit" value="Login" class="btn-info">
+    
+                </form>
+                <a href={{url_for("signup")}}>if you donot have account please signup</a>
+    
+            </div>
+            <div class="col-md-3"></div>
         </div>
-        <div class="col-md-3"></div>
     </div>
-</div>
-
-
-{% endblock %}
+    
+    
+    {% endblock %}
+</body>
+</html>
