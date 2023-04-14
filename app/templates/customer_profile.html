@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>techOnline | Profile</title>
+</head>
+<body>
+    <div class="container">
+        <img src="{{ url_for('static', filename='images/hFna7--L_400x400.jpg') }}" alt="">
+        <div class="form-container">
+            <button class="edit_button">Edit</button>
+            <form action="{{ url_for('customer_profile') }}" data-id = "{{ user.to_dict().id }}" class="profile_form">
+                <label for="first_name">First Name:</label>
+                <input type="text" value="{{ user.to_dict().first_name }}" name="first_name" disabled>
+                <label for="last_name">Last Name:</label>
+                <input type="text" value="{{ user.to_dict().last_name }}" name="last_name" disabled>
+                <label for="email">Email:</label>
+                <input type="email" value="{{ user.to_dict().email }}" name="email" disabled>
+                <input type="submit" value="Save" class="submit_button" style="display: none;">
+            </form>
+            <button style="display: none;" class="cancel_button">
+                <a href="{{ url_for('customer_profile') }}" style="color: black; text-decoration: none;">Cancel</a>
+            </button>
+        </div>
+
+        <div class="customer-products-container">
+            <h1>My Products</h1>
+            {% for product in user.products %}
+            <div class="product-container">
+                <h2>{{ product.product_name }}</h2>
+                <img src="{{ product.product_image }}" alt="">
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/customerProfile.js') }}"></script>
+</body>
+</html>

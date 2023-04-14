@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """Create Review Class"""
 from modules.baseModel import BaseModel
 from modules.baseModel import Base

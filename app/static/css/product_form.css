@@ -1,0 +1,36 @@
+/* Global Rules Start */
+:root {
+    --main-color: #0576d3 !important;
+    --second-main-color: #000 !important;
+    --third-main-color: #ffffff !important;
+    --section-background: #ebeced !important;
+}
+
+* {
+    padding: 0px;
+    margin: 0px;
+    list-style: none;
+    box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+    background-color: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--main-color) !important;
+    border-radius: 100px;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+/* Global Rules End */
+
+form input {
+    display: flex;
+}

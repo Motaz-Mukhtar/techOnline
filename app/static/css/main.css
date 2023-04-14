@@ -1,0 +1,273 @@
+/* Global Rules Start */
+:root {
+    --main-color: #0576d3 !important;
+    --second-main-color: #000 !important;
+    --third-main-color: #ffffff !important;
+    --section-background: #ebeced !important;
+}
+
+* {
+    padding: 0px;
+    margin: 0px;
+    list-style: none;
+    transition: 0.5s;
+    box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+    background-color: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--main-color) !important;
+    border-radius: 100px;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+/* Global Rules End */
+nav {
+    background-color: var(--second-main-color);
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 20px;
+}
+
+nav h1 {
+    color: var(--third-main-color);
+    font-size: 45px;
+    font-weight: 900;
+    user-select: none;
+    cursor: pointer;
+}
+
+nav h1 span {
+    color: var(--main-color);
+}
+
+nav ul {
+    display: flex;
+    align-items: center;
+}
+
+nav ul a {
+    color: var(--main-color);
+}
+
+nav ul li.button a {
+    color: var(--third-main-color);
+}
+
+nav ul li {
+    margin: 0px 40px;
+    text-decoration: underline;
+}
+
+nav ul li:hover a
+{
+    text-decoration: none;
+    cursor: pointer;
+}
+
+nav ul li.button {
+    background-color: var(--main-color);
+    padding: 5px 10px;
+    border: 3px solid transparent;
+    text-decoration: none;
+    text-decoration: underline;
+}
+
+nav ul li.button:hover
+{
+    border: 3px solid var(--second-main-color);
+    background-color: transparent;
+    border-color: var(--main-color);
+    color: var(--third-main-color);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+nav ul li.button:active {
+    color: var(--main-color);
+}
+
+header
+{
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    background-image: linear-gradient(162deg, var(--second-main-color) 55%, var(--main-color) 45%);
+    color: var(--third-main-color);
+    padding: 280px 100px;
+    color: var(--third-main-color);
+}
+
+header h1 {
+    font-size: 50px;
+    color: var(--main-color);
+}
+
+header p {
+    color: var(--third-main-color);
+    font-size: 22px;
+    margin: 50px 0px;
+}
+
+header button {
+    font-size: 20px;
+    padding: 10px 50px;
+    cursor: pointer;
+    background-color: transparent;
+    border: 4px solid var(--main-color);
+}
+
+header button a {
+    text-decoration: none;
+    color: var(--third-main-color);
+}
+
+header button:hover {
+    background-color: var(--main-color);
+}
+
+header button:active {
+    color: black;
+}
+
+
+header div img {
+    user-select: none;
+    position: absolute;
+    width: 800px;
+    right: 200px;
+    bottom: -110px;
+}
+
+.features {
+    position: relative;
+    margin: 100px;
+}
+
+.features div {
+    display: flex;
+    margin: 50px 0px;
+    align-items: center;
+}
+
+.features div div {
+    display: block;
+    margin-left: 100px;
+}
+
+.features div div h3 {
+    font-size: 30px;
+}
+
+.features div div p {
+    font-size: 20px;
+    margin-top: 30px;
+}
+
+.features div i {
+    font-size: 100px;
+    color: var(--main-color);
+}
+
+.features .img-container img {
+    width: 200px;
+    position: absolute;
+    right: 10px;
+    top: 200px;
+}
+
+.features .img-container::before {
+    content: '';
+    position: absolute;
+    right: 30px;
+    padding: 200px 70px;
+    top: 120px;
+    z-index: -10;
+    background-color: var(--main-color);}
+
+.features .img-container::after
+{
+    content: '';
+    position: absolute;
+    right: -50px;
+    padding: 200px 100px;
+    top: 80px;
+    z-index: -11;
+    background-color: var(--second-main-color);
+}
+
+.about {
+    margin: 100px;
+}
+
+.about .text {
+    margin: auto 200px;
+}
+
+.about .text p {
+    margin: 40px 0px;
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+.about .text h3 {
+    margin: 90px 0px 60px 0px;
+    font-size: 30px;
+}
+
+.about .members {
+    display: flex;
+    justify-content: space-evenly;
+    text-align: center;
+}
+
+.about .members div {
+    margin: 0px 100px;
+}
+
+
+.about .members div h1 {
+    margin: 30px 0px;
+}
+
+.about .members div i {
+    color: var(--main-color);
+    font-size: 40px;
+    margin: 0px 20px;
+}
+
+.about .members img {
+    user-select: none;
+    width: 200px;
+    border-radius: 100px;
+}
+
+.about .repo-container {
+    width: fit-content;
+    margin: 43px auto;
+    padding: 50px 0px;
+}
+
+.about .repo-container button {
+    padding: 20px 10px;
+    border: none;
+    background-color: black;
+    color: white;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.about .repo-container button:hover {
+    color: var(--main-color);
+}

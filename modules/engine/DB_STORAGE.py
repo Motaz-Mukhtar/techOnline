@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python3
 from modules.Customer.customer import Customer
 from modules.Cart.cart import Cart
 from modules.Order.order import Order
@@ -8,6 +8,11 @@ from modules.baseModel import Base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session
+import modules
+
+
+# classes = {"Customer": Customer, "Cart": Cart,
+#            "Product": Product, "Review": Review, "Order": Order}
 
 
 class DBStorage:
@@ -21,7 +26,7 @@ class DBStorage:
     def __init__(self):
         """
         """
-        self.__engine = create_engine("sqlite:///{}.db".format("test"))
+        self.__engine = create_engine("sqlite:///db/{}.db".format("techOnlineDB.db"))
 
     def all(self, cls=None):
         """
@@ -41,6 +46,29 @@ class DBStorage:
             obj = self.__session.query(cls)
         return {"{}.{}".format(type(val).__name__, val.id): val for val in obj}
 
+    def get(self, cls, id):
+        """
+            Get Specific instance on the database by id
+        """
+        if type(cls) is str:
+            cls = eval(cls)
+        
+        all_cls = modules.storage.all(cls)
+        for value in all_cls.values():
+            if value.id == id:
+                return value
+        
+        return None
+
+    def count(self, cls):
+        """
+            Count the number of instnace in specific module.
+        """
+        if type(cls) is str:
+            cls = eval(cls)
+
+        return len(modules.storage.all(cls).values())
+
     def save(self):
         """
             Update all changes in the database
@@ -59,12 +87,6 @@ class DBStorage:
             Add new instnace to the database
         """
         self.__session.add(obj)
-
-    def close(self):
-        """
-            End up the currnet Session
-        """
-        self.__session.close()
 
     def reload(self):
         """
