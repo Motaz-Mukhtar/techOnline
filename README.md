@@ -1,22 +1,20 @@
-<<<<<<< HEAD
 ## Introduction
 
-=======
-![techOnline Logo](https://github.com/Motaz-Mukhtar/techOnline/bolb/main/assets/techOnline_Logo.png)
+![techOnline Logo](https://github.com/Motaz-Mukhtar/techOnline/blob/main/assets/techOnline_Logo.png)\
+
 E-commerce Online Store
 
 
-## Introduction
-
->>>>>>> b10b267c05d4fa7ab80db175a909f069d93e3ca6
 E-commerce Online Store that allow users to showcase there tech products,
 you can try it [here](http://web-01.alxweb-01.tech/home).
+
 
 ## Technologies:
 
 The technologies that we used to build this project are:
 
-![Web Stack](https://github.com/Motaz-Mukhtar/techOnline/bolb/main/assets/2023-4-13(0).png)
+
+![Web Stack](https://github.com/Motaz-Mukhtar/techOnline/blob/main/assets/2023-4-13(0).jpg)
 
 
 #### Why These Stack?
@@ -29,7 +27,7 @@ The technologies that we used to build this project are:
 
 ## Web Architecture:
 
-![Web Architecture Diagram](https://github.com/Motaz-Mukhtar/techOnline/bolb/main/assets/2023-4-13(1).png)
+![Web Architecture Diagram](https://github.com/Motaz-Mukhtar/techOnline/blob/main/assets/2023-4-13(1).jpg)
 
 ## Authors:
 
