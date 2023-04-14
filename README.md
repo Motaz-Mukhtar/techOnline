@@ -1,4 +1,4 @@
-![techOnline Logo](https://github.com/Motaz-Mukhtar/techOnline/bolb/main/assets/techOnline Logo.png)
+![techOnline Logo](https://github.com/Motaz-Mukhtar/techOnline/bolb/main/assets/techOnline_Logo.png)
 E-commerce Online Store
 
 
