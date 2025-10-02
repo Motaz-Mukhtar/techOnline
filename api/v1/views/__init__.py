@@ -9,3 +9,6 @@ from api.v1.views.carts import *
 from api.v1.views.customers import *
 from api.v1.views.reviews import *
 from api.v1.views.orders import *
+from api.v1.views.auth import *
+from api.v1.views.stock import *
+from api.v1.views.order_workflow import *

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechOnline | Customer Signup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#2563eb',
+                        'secondary-blue': '#1d4ed8',
+                        'accent-orange': '#f59e0b',
+                        'neutral-gray': '#6b7280',
+                        'background': '#f8fafc'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Minimal custom styles for animations and special effects */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        .notification {
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+
+        
+        /* Password strength indicator styles */
+        .password-strength {
+            margin-top: 0.5rem;
+            display: none;
+        }
+        
+        .strength-fill {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-primary-blue to-secondary-blue font-sans m-0 p-0 min-h-screen flex items-center justify-center relative overflow-hidden">
+    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden w-full max-w-lg relative z-10 m-8 max-h-screen overflow-y-auto">
+        <div class="bg-gradient-to-br from-primary-blue to-secondary-blue text-white p-8 pb-6 text-center relative">
+            <h1 class="text-4xl font-black mb-2 relative z-10">tech<span class="text-accent-orange">O</span>nline</h1>
+            <p class="text-sm opacity-90 m-0 relative z-10">Join Our Community</p>
+        </div>
+        
+        <div class="p-8">
+            <h2 class="text-2xl font-bold text-center mb-8 text-gray-800">Create Account</h2>
+            
+            {% include '_messages.html' %}
+            
+            <form method="post" id="signupForm" novalidate>
+                {{ form.csrf_token }}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700" for="first_name">First Name</label>
+                        <div class="relative">
+                            <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            {{ form.first_name(class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200", id="first_name", placeholder="First name", required=true) }}
+                        </div>
+                        <div class="hidden text-red-600 text-sm mt-1" id="first_name-error">
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                            <span></span>
+                        </div>
+                        <div class="hidden text-green-600 text-sm mt-1" id="first_name-success">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            <span>Valid name</span>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700" for="last_name">Last Name</label>
+                        <div class="relative">
+                            <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            {{ form.last_name(class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200", id="last_name", placeholder="Last name", required=true) }}
+                        </div>
+                        <div class="hidden text-red-600 text-sm mt-1" id="last_name-error">
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                            <span></span>
+                        </div>
+                        <div class="hidden text-green-600 text-sm mt-1" id="last_name-success">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            <span>Valid name</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700" for="email">Email Address</label>
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        {{ form.email(class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200", id="email", placeholder="Enter your email", required=true) }}
+                    </div>
+                    <div class="hidden text-red-600 text-sm mt-1" id="email-error">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        <span></span>
+                    </div>
+                    <div class="hidden text-green-600 text-sm mt-1" id="email-success">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        <span>Valid email address</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700" for="address">Address</label>
+                    <div class="relative">
+                        <i class="fas fa-map-marker-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        {{ form.address(class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200", id="address", placeholder="Enter your address", required=true) }}
+                    </div>
+                    <div class="hidden text-red-600 text-sm mt-1" id="address-error">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        <span></span>
+                    </div>
+                    <div class="hidden text-green-600 text-sm mt-1" id="address-success">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        <span>Valid address</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700" for="password">Password</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        {{ form.password(class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200", id="password", placeholder="Create a password", required=true) }}
+                        <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none" id="passwordToggle">
+                            <i class="fas fa-eye" id="passwordIcon"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength mt-2" id="passwordStrength">
+                        <div class="strength-bar w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="strength-fill h-full bg-gray-300 transition-all duration-300 rounded-full"></div>
+                        </div>
+                        <div class="strength-text text-xs text-gray-500 mt-1">Password strength</div>
+                    </div>
+                    <div class="hidden text-red-600 text-sm mt-1" id="password-error">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        <span></span>
+                    </div>
+                    <div class="hidden text-green-600 text-sm mt-1" id="password-success">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        <span>Strong password</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700" for="confirm_password">Confirm Password</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        {{ form.confirm_password(class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200", id="confirm_password", placeholder="Confirm your password", required=true) }}
+                        <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none" id="confirmPasswordToggle">
+                            <i class="fas fa-eye" id="confirmPasswordIcon"></i>
+                        </button>
+                    </div>
+                    <div class="hidden text-red-600 text-sm mt-1" id="confirm_password-error">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        <span></span>
+                    </div>
+                    <div class="hidden text-green-600 text-sm mt-1" id="confirm_password-success">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        <span>Passwords match</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 mt-6" id="signupBtn">
+                    <span id="btnText" class="flex items-center space-x-2">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Create Account</span>
+                    </span>
+                    <div class="loading-spinner hidden" id="loadingSpinner">
+                        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    </div>
+                </button>
+            </form>
+            
+            <div class="text-center mt-6">
+                <p class="text-gray-600">Already have an account? <a href="{{ url_for('login') }}" class="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200">Sign In</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('signupForm');
+            const firstNameInput = document.getElementById('first_name');
+            const lastNameInput = document.getElementById('last_name');
+            const emailInput = document.getElementById('email');
+            const addressInput = document.getElementById('address');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirm_password');
+            const passwordToggle = document.getElementById('passwordToggle');
+            const passwordIcon = document.getElementById('passwordIcon');
+            const confirmPasswordToggle = document.getElementById('confirmPasswordToggle');
+            const confirmPasswordIcon = document.getElementById('confirmPasswordIcon');
+            const signupBtn = document.getElementById('signupBtn');
+            const btnText = document.getElementById('btnText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const passwordStrength = document.getElementById('passwordStrength');
+            
+            // Password visibility toggles
+            passwordToggle.addEventListener('click', function() {
+                togglePasswordVisibility(passwordInput, passwordIcon);
+            });
+            
+            confirmPasswordToggle.addEventListener('click', function() {
+                togglePasswordVisibility(confirmPasswordInput, confirmPasswordIcon);
+            });
+            
+            function togglePasswordVisibility(input, icon) {
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                
+                if (type === 'text') {
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            }
+            
+            // Real-time validation
+            firstNameInput.addEventListener('input', function() {
+                validateName(this, 'first_name');
+            });
+            
+            lastNameInput.addEventListener('input', function() {
+                validateName(this, 'last_name');
+            });
+            
+            emailInput.addEventListener('input', function() {
+                validateEmail(this);
+            });
+            
+            addressInput.addEventListener('input', function() {
+                validateAddress(this);
+            });
+            
+            passwordInput.addEventListener('input', function() {
+                validatePassword(this);
+                updatePasswordStrength(this.value);
+                if (confirmPasswordInput.value) {
+                    validateConfirmPassword(confirmPasswordInput);
+                }
+            });
+            
+            confirmPasswordInput.addEventListener('input', function() {
+                validateConfirmPassword(this);
+            });
+            
+            function validateName(input, fieldName) {
+                const name = input.value.trim();
+                
+                if (name === '') {
+                    clearValidation(input, fieldName);
+                } else if (name.length >= 2 && /^[a-zA-Z\s]+$/.test(name)) {
+                    showSuccess(input, fieldName);
+                } else {
+                    showError(input, fieldName, 'Name must be at least 2 characters and contain only letters');
+                }
+            }
+            
+            function validateEmail(input) {
+                const email = input.value.trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
+                if (email === '') {
+                    clearValidation(input, 'email');
+                } else if (emailRegex.test(email)) {
+                    showSuccess(input, 'email');
+                } else {
+                    showError(input, 'email', 'Please enter a valid email address');
+                }
+            }
+            
+            function validateAddress(input) {
+                const address = input.value.trim();
+                
+                if (address === '') {
+                    clearValidation(input, 'address');
+                } else if (address.length >= 10) {
+                    showSuccess(input, 'address');
+                } else {
+                    showError(input, 'address', 'Address must be at least 10 characters');
+                }
+            }
+            
+            function validatePassword(input) {
+                const password = input.value;
+                
+                if (password === '') {
+                    clearValidation(input, 'password');
+                    passwordStrength.style.display = 'none';
+                } else if (password.length >= 8 && /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+                    showSuccess(input, 'password');
+                } else {
+                    showError(input, 'password', 'Password must be at least 8 characters with uppercase, lowercase, and number');
+                }
+            }
+            
+            function validateConfirmPassword(input) {
+                const confirmPassword = input.value;
+                const password = passwordInput.value;
+                
+                if (confirmPassword === '') {
+                    clearValidation(input, 'confirm_password');
+                } else if (confirmPassword === password) {
+                    showSuccess(input, 'confirm_password');
+                } else {
+                    showError(input, 'confirm_password', 'Passwords do not match');
+                }
+            }
+            
+            function updatePasswordStrength(password) {
+                if (password === '') {
+                    passwordStrength.classList.add('hidden');
+                    return;
+                }
+                
+                passwordStrength.classList.remove('hidden');
+                
+                let strength = 0;
+                let strengthText = '';
+                
+                // Length check
+                if (password.length >= 8) strength++;
+                
+                // Lowercase check
+                if (/[a-z]/.test(password)) strength++;
+                
+                // Uppercase check
+                if (/[A-Z]/.test(password)) strength++;
+                
+                // Number check
+                if (/\d/.test(password)) strength++;
+                
+                // Special character check
+                if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+                
+                const strengthFill = passwordStrength.querySelector('.strength-fill');
+                const strengthTextElement = passwordStrength.querySelector('.strength-text');
+                
+                // Remove all strength classes
+                strengthFill.classList.remove('bg-red-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500');
+                
+                if (strength <= 2) {
+                    strengthFill.classList.add('bg-red-500');
+                    strengthFill.style.width = '25%';
+                    strengthText = 'Weak';
+                } else if (strength === 3) {
+                    strengthFill.classList.add('bg-yellow-500');
+                    strengthFill.style.width = '50%';
+                    strengthText = 'Fair';
+                } else if (strength === 4) {
+                    strengthFill.classList.add('bg-blue-500');
+                    strengthFill.style.width = '75%';
+                    strengthText = 'Good';
+                } else {
+                    strengthFill.classList.add('bg-green-500');
+                    strengthFill.style.width = '100%';
+                    strengthText = 'Strong';
+                }
+                
+                strengthTextElement.textContent = strengthText;
+            }
+            
+            function showError(input, fieldName, message) {
+                input.classList.remove('border-green-500', 'focus:ring-green-500');
+                input.classList.add('border-red-500', 'focus:ring-red-500');
+                
+                const errorElement = document.getElementById(fieldName + '-error');
+                const successElement = document.getElementById(fieldName + '-success');
+                
+                errorElement.querySelector('span').textContent = message;
+                errorElement.classList.remove('hidden');
+                successElement.classList.add('hidden');
+            }
+            
+            function showSuccess(input, fieldName) {
+                input.classList.remove('border-red-500', 'focus:ring-red-500');
+                input.classList.add('border-green-500', 'focus:ring-green-500');
+                
+                const errorElement = document.getElementById(fieldName + '-error');
+                const successElement = document.getElementById(fieldName + '-success');
+                
+                errorElement.classList.add('hidden');
+                successElement.classList.remove('hidden');
+            }
+            
+            function clearValidation(input, fieldName) {
+                input.classList.remove('border-red-500', 'focus:ring-red-500', 'border-green-500', 'focus:ring-green-500');
+                
+                const errorElement = document.getElementById(fieldName + '-error');
+                const successElement = document.getElementById(fieldName + '-success');
+                
+                errorElement.classList.add('hidden');
+                successElement.classList.add('hidden');
+            }
+            
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Validate all fields
+                validateName(firstNameInput, 'first_name');
+                validateName(lastNameInput, 'last_name');
+                validateEmail(emailInput);
+                validateAddress(addressInput);
+                validatePassword(passwordInput);
+                validateConfirmPassword(confirmPasswordInput);
+                
+                const hasErrors = document.querySelectorAll('input.border-red-500').length > 0;
+                const isEmpty = [firstNameInput, lastNameInput, emailInput, addressInput, passwordInput, confirmPasswordInput]
+                    .some(input => input.value.trim() === '');
+                
+                if (hasErrors || isEmpty) {
+                    // Shake animation for invalid form
+                    form.classList.add('shake');
+                    setTimeout(() => {
+                        form.classList.remove('shake');
+                    }, 500);
+                    
+                    showNotification('Please fix the errors before creating your account', 'error');
+                    return;
+                }
+                
+                // Show loading state
+                signupBtn.disabled = true;
+                btnText.classList.add('hidden');
+                loadingSpinner.classList.remove('hidden');
+                
+                // Submit form after delay (for demo purposes)
+                setTimeout(() => {
+                    // In real implementation, just submit the form
+                    form.submit();
+                }, 1500);
+            });
+            
+            function showNotification(message, type) {
+                // Remove existing notifications
+                const existingNotifications = document.querySelectorAll('[data-notification]');
+                existingNotifications.forEach(notification => notification.remove());
+                
+                // Create new notification
+                const notification = document.createElement('div');
+                notification.setAttribute('data-notification', 'true');
+                
+                const bgColor = type === 'error' ? 'bg-red-500' : 'bg-green-500';
+                notification.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg font-medium z-50 transform translate-x-full transition-transform duration-300 ease-in-out`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                // Show notification
+                setTimeout(() => {
+                    notification.classList.remove('translate-x-full');
+                }, 100);
+                
+                // Hide notification after 3 seconds
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>

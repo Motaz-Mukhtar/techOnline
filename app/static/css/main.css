@@ -1,9 +1,20 @@
 /* Global Rules Start */
 :root {
-    --main-color: #0576d3 !important;
-    --second-main-color: #000 !important;
-    --third-main-color: #ffffff !important;
-    --section-background: #ebeced !important;
+    --primary-blue: #0576d3;
+    --secondary-blue: #1e40af;
+    --accent-orange: #f59e0b;
+    --success-green: #10b981;
+    --error-red: #ef4444;
+    --neutral-gray: #6b7280;
+    --background: #f8fafc;
+    --white: #ffffff;
+    --black: #1f2937;
+    
+    /* Legacy support - map old variables to new ones */
+    --main-color: var(--primary-blue);
+    --second-main-color: var(--black);
+    --third-main-color: var(--white);
+    --section-background: var(--background);
 }
 
 * {
@@ -48,7 +59,7 @@ nav h1 {
 }
 
 nav h1 span {
-    color: var(--main-color);
+    color: var(--accent-orange);
 }
 
 nav ul {

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechOnline | Customer Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#2563eb',
+                        'secondary-blue': '#1d4ed8',
+                        'accent-orange': '#f59e0b',
+                        'neutral-gray': '#6b7280',
+                        'background': '#f8fafc'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Minimal custom styles for animations and special effects */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        .notification {
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-primary-blue to-secondary-blue font-sans m-0 p-0 min-h-screen flex items-center justify-center relative overflow-hidden">
+    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden w-full max-w-md relative z-10 mx-8">
+        <div class="bg-gradient-to-br from-primary-blue to-secondary-blue text-white px-8 pt-10 pb-8 text-center relative">
+            <h1 class="text-4xl font-black mb-2 relative z-10">tech<span class="text-accent-orange">O</span>nline</h1>
+            <p class="text-base opacity-90 m-0 relative z-10">Customer Portal</p>
+        </div>
+        
+        <div class="px-10 py-10">
+            <h2 class="text-center text-black text-3xl font-semibold mb-8">Welcome Back</h2>
+            
+            {% include '_messages.html' %}
+            
+            <form method="post" id="loginForm" novalidate>
+                {{ form.csrf_token }}
+                
+                <div class="mb-6 relative">
+                    <label class="block text-neutral-gray font-semibold mb-2 text-sm uppercase tracking-wide" for="email">Email Address</label>
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-gray z-10"></i>
+                        {{ form.email(class="w-full py-4 pl-12 pr-4 border-2 border-background rounded-xl text-base transition-all duration-300 bg-white text-black focus:outline-none focus:border-primary-blue focus:ring-4 focus:ring-primary-blue focus:ring-opacity-10", id="email", placeholder="Enter your email", required=true) }}
+                    </div>
+                    <div class="hidden text-red-500 text-sm mt-2 items-center gap-1" id="email-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span></span>
+                    </div>
+                    <div class="hidden text-green-500 text-sm mt-2 items-center gap-1" id="email-success">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Valid email address</span>
+                    </div>
+                </div>
+                
+                <div class="mb-6 relative">
+                    <label class="block text-neutral-gray font-semibold mb-2 text-sm uppercase tracking-wide" for="password">Password</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-gray z-10"></i>
+                        {{ form.password(class="w-full py-4 pl-12 pr-12 border-2 border-background rounded-xl text-base transition-all duration-300 bg-white text-black focus:outline-none focus:border-primary-blue focus:ring-4 focus:ring-primary-blue focus:ring-opacity-10", id="password", placeholder="Enter your password", required=true) }}
+                        <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-transparent border-none text-neutral-gray cursor-pointer p-1 rounded transition-colors duration-300 hover:text-primary-blue" id="passwordToggle">
+                            <i class="fas fa-eye" id="passwordIcon"></i>
+                        </button>
+                    </div>
+                    <div class="hidden text-red-500 text-sm mt-2 items-center gap-1" id="password-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span></span>
+                    </div>
+                    <div class="hidden text-green-500 text-sm mt-2 items-center gap-1" id="password-success">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Password entered</span>
+                    </div>
+                </div>
+                
+                <div class="text-right mb-8">
+                    <a href="#" class="text-primary-blue no-underline text-sm font-medium transition-colors duration-300 hover:text-secondary-blue hover:underline">Forgot your password?</a>
+                </div>
+                
+                <button type="submit" class="w-full py-4 bg-primary-blue text-white border-none rounded-xl text-base font-semibold cursor-pointer transition-all duration-300 flex items-center justify-center gap-2 relative overflow-hidden hover:bg-secondary-blue hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary-blue/30 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none" id="loginBtn">
+                    <span id="btnText">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </span>
+                    <div class="hidden w-5 h-5 border-2 border-transparent border-t-white rounded-full loading-spinner" id="loadingSpinner"></div>
+                </button>
+            </form>
+            
+            <div class="text-center mt-8 pt-6 border-t-2 border-background">
+                <p class="text-neutral-gray m-0 text-sm">Don't have an account? <a href="{{ url_for('signup') }}" class="text-primary-blue no-underline font-semibold transition-colors duration-300 hover:text-secondary-blue hover:underline">Create Account</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const passwordToggle = document.getElementById('passwordToggle');
+            const passwordIcon = document.getElementById('passwordIcon');
+            const loginBtn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('btnText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            // Password visibility toggle
+            passwordToggle.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                if (type === 'text') {
+                    passwordIcon.classList.remove('fa-eye');
+                    passwordIcon.classList.add('fa-eye-slash');
+                } else {
+                    passwordIcon.classList.remove('fa-eye-slash');
+                    passwordIcon.classList.add('fa-eye');
+                }
+            });
+            
+            // Real-time validation
+            emailInput.addEventListener('input', function() {
+                validateEmail(this);
+            });
+            
+            emailInput.addEventListener('blur', function() {
+                validateEmail(this);
+            });
+            
+            passwordInput.addEventListener('input', function() {
+                validatePassword(this);
+            });
+            
+            passwordInput.addEventListener('blur', function() {
+                validatePassword(this);
+            });
+            
+            function validateEmail(input) {
+                const email = input.value.trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
+                if (email === '') {
+                    clearValidation(input, 'email');
+                } else if (emailRegex.test(email)) {
+                    showSuccess(input, 'email');
+                } else {
+                    showError(input, 'email', 'Please enter a valid email address');
+                }
+            }
+            
+            function validatePassword(input) {
+                const password = input.value;
+                
+                if (password === '') {
+                    clearValidation(input, 'password');
+                } else if (password.length >= 6) {
+                    showSuccess(input, 'password');
+                } else {
+                    showError(input, 'password', 'Password must be at least 6 characters');
+                }
+            }
+            
+            function showError(input, fieldName, message) {
+                input.classList.remove('success');
+                input.classList.add('error');
+                
+                const errorElement = document.getElementById(fieldName + '-error');
+                const successElement = document.getElementById(fieldName + '-success');
+                
+                errorElement.querySelector('span').textContent = message;
+                errorElement.style.display = 'flex';
+                successElement.style.display = 'none';
+            }
+            
+            function showSuccess(input, fieldName) {
+                input.classList.remove('error');
+                input.classList.add('success');
+                
+                const errorElement = document.getElementById(fieldName + '-error');
+                const successElement = document.getElementById(fieldName + '-success');
+                
+                errorElement.style.display = 'none';
+                successElement.style.display = 'flex';
+            }
+            
+            function clearValidation(input, fieldName) {
+                input.classList.remove('error', 'success');
+                
+                const errorElement = document.getElementById(fieldName + '-error');
+                const successElement = document.getElementById(fieldName + '-success');
+                
+                errorElement.style.display = 'none';
+                successElement.style.display = 'none';
+            }
+            
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Validate all fields
+                validateEmail(emailInput);
+                validatePassword(passwordInput);
+                
+                const hasErrors = document.querySelectorAll('.form-control.error').length > 0;
+                const isEmpty = emailInput.value.trim() === '' || passwordInput.value === '';
+                
+                if (hasErrors || isEmpty) {
+                    // Shake animation for invalid form
+                    form.classList.add('shake');
+                    setTimeout(() => {
+                        form.classList.remove('shake');
+                    }, 500);
+                    
+                    showNotification('Please fix the errors before signing in', 'error');
+                    return;
+                }
+                
+                // Show loading state
+                loginBtn.disabled = true;
+                btnText.style.display = 'none';
+                loadingSpinner.style.display = 'block';
+                
+                // Submit form after delay (for demo purposes)
+                setTimeout(() => {
+                    // In real implementation, just submit the form
+                    form.submit();
+                }, 1500);
+            });
+            
+            function showNotification(message, type) {
+                // Remove existing notifications
+                const existingNotifications = document.querySelectorAll('.notification');
+                existingNotifications.forEach(notification => notification.remove());
+                
+                // Create new notification
+                const notification = document.createElement('div');
+                const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+                notification.className = `notification fixed top-5 right-5 px-6 py-4 rounded-xl text-white font-semibold z-50 ${bgColor}`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                // Show notification
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 100);
+                
+                // Hide notification after 3 seconds
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>

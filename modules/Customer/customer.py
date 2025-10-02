@@ -29,12 +29,14 @@ class Customer(UserMixin, BaseModel, Base):
     last_name = Column(String(128), nullable=False)
     email = Column(String(128), nullable=False, unique=True)
     password = Column(String(128), nullable=False)
-    profile_avatar = Column(Text, default="")
+    profile_avatar = Column(String(255), default="")  # Store file path or URL
+    profile_avatar_filename = Column(String(255))  # Store original filename for management
     order_status = Column(Boolean, default=False)
     address = Column(String(128))
     products = relationship('Product',
                             backref='customer',
                             cascade='delete') #type: ignore
+    reviews = relationship('Review', back_populates='customer', cascade='all, delete-orphan')
     
     @property
     def products(self):
@@ -44,6 +46,10 @@ class Customer(UserMixin, BaseModel, Base):
         for product in all_products.values():
             if product.customer_id == self.id:
                 product_dict = product.to_dict()
-                product_dict['product_image'] = f'http://127.0.0.1:5000/product_img/{product.id}'
+                # Use the stored image URL or provide a default
+                if product.product_image:
+                    product_dict['product_image'] = product.product_image
+                else:
+                    product_dict['product_image'] = '/static/images/default-product.png'
                 product_list.append(product_dict)
         return product_list

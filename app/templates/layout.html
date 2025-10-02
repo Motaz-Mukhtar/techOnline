@@ -1,229 +1,221 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <!-- Required meta tags -->
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css' )}}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
-    <!-- {% if title %} -->
-    <!-- {% else %} -->
-    <title>techOnline | Shop</title>
-    <!-- {% endif %} -->
-  </head>
-  <body>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>TechOnline | Shop</title>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#2563eb',
+                        'secondary-blue': '#1d4ed8',
+                        'accent-orange': '#f59e0b',
+                        'neutral-gray': '#6b7280',
+                        'background': '#f8fafc'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Minimal custom styles - most styling now handled by Tailwind */
+        
+        .stock-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 0.25rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .in-stock {
+            background: #10b981;
+            color: white;
+        }
+        
+        .out-of-stock {
+            background: #ef4444;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-background font-sans m-0 p-0">
     {% block content %}
-        <div class="search-container">
-          <h1 class="logo">tech<span>O</span>nline</h1>
-          <form action="" method="post">
-            <input type="search" name="product_name" required  placeholder="search for product">
-            <input type="submit" value="Search">
-          </form>
-          <ul class="bar">
-            <li><a href="{{ url_for('customer_profile') }}">Profile</a></li>
-            <li><a href="{{ url_for('product_form') }}">show Your product</a></li>
-            <li><a href="{{ url_for('logout') }}"> Logout</a></li>
-          </ul>
+    <header class="bg-gradient-to-br from-primary-blue to-secondary-blue text-white py-4 shadow-lg">
+        <div class="max-w-6xl mx-auto px-8 flex justify-between items-center flex-wrap gap-4">
+            <h1 class="text-4xl font-black m-0 cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105">tech<span class="text-accent-orange">O</span>nline</h1>
+            
+            <form class="flex gap-2 flex-1 max-w-lg mx-8" method="post" action="{{ url_for('shop') }}">
+                <input type="search" 
+                       name="product_name" 
+                       class="flex-1 px-4 py-3 border-0 rounded-full text-base outline-none shadow-md" 
+                       placeholder="Search for products..." 
+                       value="{{ search_query or '' }}">
+                <button type="submit" class="bg-accent-orange text-white border-0 px-6 py-3 rounded-full cursor-pointer font-semibold transition-all duration-300 ease-in-out shadow-md hover:bg-yellow-600 hover:-translate-y-0.5 hover:shadow-lg">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </form>
+            
+            <ul class="flex gap-4 list-none m-0 p-0">
+                <li><a href="{{ url_for('customer_profile') }}" class="text-white no-underline px-4 py-2 rounded-2xl transition-all duration-300 ease-in-out font-medium hover:bg-white hover:bg-opacity-20 hover:-translate-y-0.5"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="{{ url_for('product_form') }}" class="text-white no-underline px-4 py-2 rounded-2xl transition-all duration-300 ease-in-out font-medium hover:bg-white hover:bg-opacity-20 hover:-translate-y-0.5"><i class="fas fa-plus"></i> Add Product</a></li>
+                <li><a href="{{ url_for('logout') }}" class="text-white no-underline px-4 py-2 rounded-2xl transition-all duration-300 ease-in-out font-medium hover:bg-white hover:bg-opacity-20 hover:-translate-y-0.5"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
         </div>
-
-        <div class="products-container">
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
-          <div class="container">
-            <img src="../static/images/mobile.png" alt="product-picture">
-            <span>Iphone 12</span>
-            <div>
-              <p>lsdakfjalsdkfjsdlkfjsdlkfjdslkfjsdlkfjsdklfjsdkljfskldjflksdjfkljsdklfjlsdkjflsdkjflsdkjflsdkjfsdklfj</p>
-            </div>
-          </div>
+    </header>
+    
+    <main class="max-w-6xl mx-auto my-8 px-8">
+        {% if search_query %}
+        <div class="bg-white p-4 rounded-lg mb-8 shadow-lg">
+            <h3><i class="fas fa-search"></i> Search Results for "{{ search_query }}"</h3>
+            <p>Found {{ products|length }} product(s)</p>
         </div>
-        <!-- {% if name %}
-        <h1>{{ name.id }}</h1>
-        <h1>{{ name.first_name }} {{ name.last_name }}</h1>
-        {% endif %} -->
-
+        {% else %}
+        <div class="text-center mb-8 text-black">
+            <h2>Our Products</h2>
+            <p>Discover the latest tech products</p>
+        </div>
+        {% endif %}
+        
+        {% if products %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-8">
+            {% for product in products %}
+            <div class="bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 ease-in-out cursor-pointer hover:-translate-y-1 hover:shadow-xl">
+                <div class="relative">
+                    {% if product.product_image %}
+                    <img src="{{ product.product_image }}" alt="{{ product.product_name }}" class="w-full h-48 object-cover">
+                    {% else %}
+                    <div class="w-full h-48 flex items-center justify-center bg-background">
+                        <i class="fas fa-image text-5xl text-neutral-gray"></i>
+                    </div>
+                    {% endif %}
+                    
+                    {% if product.stock_quantity is defined %}
+                        {% if product.stock_quantity > 0 %}
+                        <span class="stock-badge in-stock">In Stock</span>
+                        {% else %}
+                        <span class="stock-badge out-of-stock">Out of Stock</span>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-black mb-2">{{ product.product_name }}</h3>
+                    
+                    {% if product.product_description %}
+                    <p class="text-neutral-gray text-sm leading-relaxed mb-4 line-clamp-3">{{ product.product_description }}</p>
+                    {% endif %}
+                    
+                    {% if product.price is defined %}
+                    <div class="text-2xl font-bold text-primary-blue mb-4">${{ "%.2f"|format(product.price) }}</div>
+                    {% endif %}
+                    
+                    <div class="flex gap-2">
+                        <button class="bg-primary-blue text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out flex-1 hover:bg-secondary-blue hover:-translate-y-0.5" onclick="viewProduct('{{ product.id }}')">View Details</button>
+                        {% if product.stock_quantity is defined and product.stock_quantity > 0 %}
+                        <button class="bg-accent-orange text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out hover:bg-yellow-600 hover:-translate-y-0.5" onclick="addToCart('{{ product.id }}')">Add to Cart</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12 text-neutral-gray">
+            <i class="fas fa-box-open text-6xl mb-4 text-neutral-gray"></i>
+            <h3>No Products Found</h3>
+            {% if search_query %}
+            <p>No products match your search for "{{ search_query }}". Try different keywords.</p>
+            <a href="{{ url_for('shop') }}" class="bg-primary-blue text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out hover:bg-secondary-blue hover:-translate-y-0.5 inline-block mt-4 no-underline">View All Products</a>
+            {% else %}
+            <p>No products are currently available. Check back later!</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </main>
     {% endblock content %}
-    <script src="{{ url_for('static',filename='js/bootstrap.bundle.min.js')}}"></script>
-  </body>
+    
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script>
+        function viewProduct(productId) {
+            // Navigate to product details page
+            window.location.href = `/product/${productId}`;
+        }
+        
+        function addToCart(productId) {
+            // Add product to cart via API
+            fetch('/api/v1/carts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: 1
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Product added to cart!', 'success');
+                } else {
+                    showNotification('Failed to add product to cart', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error adding product to cart', 'error');
+            });
+        }
+        
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                color: white;
+                font-weight: 600;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+                background: ${type === 'success' ? 'var(--success-green)' : 'var(--error-red)'};
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
 </html>

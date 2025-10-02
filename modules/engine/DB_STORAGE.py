@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 from modules.Customer.customer import Customer
 from modules.Cart.cart import Cart
+from modules.Cart.cart_item import CartItem
+from modules.Category.category import Category
 from modules.Order.order import Order
+from modules.Order.order_item import OrderItem
 from modules.Products.product import Product
 from modules.Review.review import Review
 from modules.baseModel import Base
@@ -37,9 +40,12 @@ class DBStorage:
         if cls is None:
             obj = self.__session.query(Customer).all()
             obj.extend(self.__session.query(Review).all())
+            obj.extend(self.__session.query(Category).all())
             obj.extend(self.__session.query(Order).all())
+            obj.extend(self.__session.query(OrderItem).all())
             obj.extend(self.__session.query(Product).all())
             obj.extend(self.__session.query(Cart).all())
+            obj.extend(self.__session.query(CartItem).all())
         else:
             if type(cls) == str:
                 cls = eval(cls)

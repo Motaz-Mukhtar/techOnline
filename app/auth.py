@@ -17,8 +17,8 @@ class CustomerSignupForm(FlaskForm):
     first_name = StringField('first_name: ')
     last_name = StringField('last_name: ', [validators.DataRequired()])
     email = StringField('Email: ', [validators.Email(), validators.DataRequired()])
-    password = PasswordField('Password: ', [validators.DataRequired(), validators.EqualTo('confirm', message=' Both password must match! ')])
-    confirm = PasswordField('Repeat Password: ', [validators.DataRequired()])
+    password = PasswordField('Password: ', [validators.DataRequired(), validators.EqualTo('confirm_password', message=' Both password must match! ')])
+    confirm_password = PasswordField('Repeat Password: ', [validators.DataRequired()])
     address = StringField('Address: ', [validators.DataRequired()])
     profile = FileField('Profile', validators=[FileAllowed(['jpg','png','jpeg','gif'], 'Image only please')])
     submit = SubmitField('Register')
@@ -61,10 +61,10 @@ def login():
 @app.route('/login', methods=['GET'], strict_slashes=False)
 def get_login():
     form = CustomerLoginForm()
-    return render_template('admin/login.html', form=form)
+    return render_template('customer_login.html', form=form)
     
 
-@app.route('/home') # type: ignore
+@app.route('/', methods=['GET'], strict_slashes=False) # type: ignore
 def test():
     return render_template('home.html')
 
@@ -86,7 +86,7 @@ def signup():
         flash(f'welcome {form.first_name.data} Thanks for registering','success')
         storage.save()
         return redirect(url_for('login'))
-    return render_template('admin/signup.html',title='Register user', form=form)
+    return render_template('customer_signup.html',title='Register user', form=form)
 
 @app.route('/home')
 def home():

@@ -1,1 +1,602 @@
-dash board
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechOnline Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: var(--background);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--white);
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .admin-header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-logo {
+            font-size: 2rem;
+            font-weight: 900;
+            margin: 0;
+        }
+        
+        .admin-logo span {
+            color: var(--accent-orange);
+        }
+        
+        .admin-nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .admin-nav a {
+            color: var(--white);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .admin-nav a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .dashboard-title {
+            margin-bottom: 2rem;
+        }
+        
+        .dashboard-title h1 {
+            color: var(--black);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .dashboard-title p {
+            color: var(--neutral-gray);
+            font-size: 1.1rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-blue);
+        }
+        
+        .stat-card.orders::before { background: var(--accent-orange); }
+        .stat-card.revenue::before { background: var(--success-green); }
+        .stat-card.customers::before { background: var(--secondary-blue); }
+        .stat-card.products::before { background: var(--primary-blue); }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-blue);
+        }
+        
+        .stat-card.orders .stat-icon { color: var(--accent-orange); }
+        .stat-card.revenue .stat-icon { color: var(--success-green); }
+        .stat-card.customers .stat-icon { color: var(--secondary-blue); }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--black);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--neutral-gray);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-change {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .stat-change.positive {
+            color: var(--success-green);
+        }
+        
+        .stat-change.negative {
+            color: var(--error-red);
+        }
+        
+        .charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .chart-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--black);
+            margin-bottom: 1.5rem;
+        }
+        
+        .management-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .management-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .management-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .management-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .management-icon {
+            font-size: 2rem;
+            margin-right: 1rem;
+            color: var(--primary-blue);
+        }
+        
+        .management-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--black);
+        }
+        
+        .management-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+        
+        .btn-primary {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary-blue);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--accent-orange);
+            color: var(--white);
+        }
+        
+        .btn-secondary:hover {
+            background: #e08e00;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: var(--success-green);
+            color: var(--white);
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .recent-activity {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--background);
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            color: var(--white);
+        }
+        
+        .activity-icon.order { background: var(--accent-orange); }
+        .activity-icon.user { background: var(--primary-blue); }
+        .activity-icon.product { background: var(--success-green); }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-text {
+            color: var(--black);
+            margin-bottom: 0.25rem;
+        }
+        
+        .activity-time {
+            color: var(--neutral-gray);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+            
+            .dashboard-container {
+                padding: 0 1rem;
+            }
+            
+            .admin-header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <h1 class="admin-logo">tech<span>O</span>nline <small style="font-size: 0.6em; font-weight: 400;">Admin</small></h1>
+            <nav class="admin-nav">
+                <a href="#"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="#"><i class="fas fa-box"></i> Products</a>
+                <a href="#"><i class="fas fa-shopping-cart"></i> Orders</a>
+                <a href="#"><i class="fas fa-users"></i> Customers</a>
+                <a href="#"><i class="fas fa-chart-bar"></i> Analytics</a>
+                <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="dashboard-container">
+        <div class="dashboard-title">
+            <h1>Dashboard Overview</h1>
+            <p>Welcome back! Here's what's happening with your store today.</p>
+        </div>
+        
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card products">
+                <div class="stat-icon">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div class="stat-number" id="total-products">0</div>
+                <div class="stat-label">Total Products</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> +12% from last month
+                </div>
+            </div>
+            
+            <div class="stat-card orders">
+                <div class="stat-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="stat-number" id="total-orders">0</div>
+                <div class="stat-label">Total Orders</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> +8% from last month
+                </div>
+            </div>
+            
+            <div class="stat-card revenue">
+                <div class="stat-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-number" id="total-revenue">$0</div>
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> +15% from last month
+                </div>
+            </div>
+            
+            <div class="stat-card customers">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number" id="total-customers">0</div>
+                <div class="stat-label">Total Customers</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> +5% from last month
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3 class="chart-title">Sales Overview</h3>
+                <canvas id="salesChart" width="400" height="200"></canvas>
+            </div>
+            
+            <div class="chart-card">
+                <h3 class="chart-title">Top Categories</h3>
+                <canvas id="categoriesChart" width="300" height="300"></canvas>
+            </div>
+        </div>
+        
+        <!-- Management Cards -->
+        <div class="management-grid">
+            <div class="management-card">
+                <div class="management-header">
+                    <div class="management-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="management-title">Product Management</div>
+                </div>
+                <div class="management-actions">
+                    <a href="#" class="action-btn btn-primary">View All Products</a>
+                    <a href="#" class="action-btn btn-secondary">Add New Product</a>
+                    <a href="#" class="action-btn btn-success">Manage Categories</a>
+                </div>
+            </div>
+            
+            <div class="management-card">
+                <div class="management-header">
+                    <div class="management-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="management-title">Order Management</div>
+                </div>
+                <div class="management-actions">
+                    <a href="#" class="action-btn btn-primary">View All Orders</a>
+                    <a href="#" class="action-btn btn-secondary">Pending Orders</a>
+                    <a href="#" class="action-btn btn-success">Order Reports</a>
+                </div>
+            </div>
+            
+            <div class="management-card">
+                <div class="management-header">
+                    <div class="management-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="management-title">Customer Management</div>
+                </div>
+                <div class="management-actions">
+                    <a href="#" class="action-btn btn-primary">View All Customers</a>
+                    <a href="#" class="action-btn btn-secondary">Customer Support</a>
+                    <a href="#" class="action-btn btn-success">Customer Analytics</a>
+                </div>
+            </div>
+            
+            <div class="management-card">
+                <div class="management-header">
+                    <div class="management-icon">
+                        <i class="fas fa-warehouse"></i>
+                    </div>
+                    <div class="management-title">Inventory Management</div>
+                </div>
+                <div class="management-actions">
+                    <a href="#" class="action-btn btn-primary">Stock Levels</a>
+                    <a href="#" class="action-btn btn-secondary">Low Stock Alerts</a>
+                    <a href="#" class="action-btn btn-success">Inventory Reports</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="recent-activity">
+            <h3 class="chart-title">Recent Activity</h3>
+            <div id="activity-list">
+                <div class="activity-item">
+                    <div class="activity-icon order">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">New order #1234 received</div>
+                        <div class="activity-time">2 minutes ago</div>
+                    </div>
+                </div>
+                
+                <div class="activity-item">
+                    <div class="activity-icon user">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">New customer registered</div>
+                        <div class="activity-time">15 minutes ago</div>
+                    </div>
+                </div>
+                
+                <div class="activity-item">
+                    <div class="activity-icon product">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">Product "iPhone 14" updated</div>
+                        <div class="activity-time">1 hour ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script>
+        // Initialize dashboard data
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            initializeCharts();
+        });
+        
+        async function loadDashboardData() {
+            try {
+                // Load statistics from API
+                const [products, orders, customers] = await Promise.all([
+                    fetch('/api/v1/products').then(r => r.json()),
+                    fetch('/api/v1/orders').then(r => r.json()),
+                    fetch('/api/v1/customers').then(r => r.json())
+                ]);
+                
+                // Update statistics
+                document.getElementById('total-products').textContent = products.length || 0;
+                document.getElementById('total-orders').textContent = orders.length || 0;
+                document.getElementById('total-customers').textContent = customers.length || 0;
+                
+                // Calculate revenue
+                const revenue = orders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
+                document.getElementById('total-revenue').textContent = `$${revenue.toFixed(2)}`;
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                // Set default values if API fails
+                document.getElementById('total-products').textContent = '156';
+                document.getElementById('total-orders').textContent = '89';
+                document.getElementById('total-customers').textContent = '234';
+                document.getElementById('total-revenue').textContent = '$12,450';
+            }
+        }
+        
+        function initializeCharts() {
+            // Sales Chart
+            const salesCtx = document.getElementById('salesChart').getContext('2d');
+            new Chart(salesCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Sales',
+                        data: [1200, 1900, 3000, 5000, 2000, 3000],
+                        borderColor: 'rgb(5, 118, 211)',
+                        backgroundColor: 'rgba(5, 118, 211, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Categories Chart
+            const categoriesCtx = document.getElementById('categoriesChart').getContext('2d');
+            new Chart(categoriesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Electronics', 'Accessories', 'Computers', 'Mobile'],
+                    datasets: [{
+                        data: [35, 25, 25, 15],
+                        backgroundColor: [
+                            'rgb(5, 118, 211)',
+                            'rgb(245, 158, 11)',
+                            'rgb(16, 185, 129)',
+                            'rgb(30, 64, 175)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

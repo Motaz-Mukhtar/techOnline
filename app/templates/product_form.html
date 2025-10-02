@@ -2,24 +2,842 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>techOnline | Product Form</title>
+    <title>TechOnline | Add Product</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: var(--background);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .form-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--white);
+            padding: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .form-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+            opacity: 0.1;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .form-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--white);
+            text-decoration: none;
+        }
+        
+        .logo span {
+            color: var(--accent-orange);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent-orange);
+        }
+        
+        .form-title {
+            text-align: center;
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .form-subtitle {
+            text-align: center;
+            margin: 0.5rem 0 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .main-container {
+            max-width: 800px;
+            margin: -3rem auto 0;
+            padding: 0 2rem 2rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .form-card {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .form-container {
+            padding: 2.5rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            gap: 2rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .form-label {
+            color: var(--neutral-gray);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .required {
+            color: var(--error-red);
+        }
+        
+        .form-control {
+            padding: 1rem;
+            border: 2px solid var(--background);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+            color: var(--black);
+            font-family: inherit;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(5, 118, 211, 0.1);
+        }
+        
+        .form-control.error {
+            border-color: var(--error-red);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+        
+        .form-control.success {
+            border-color: var(--success-green);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        .textarea-control {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        .price-input {
+            position: relative;
+        }
+        
+        .price-input::before {
+            content: '$';
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--neutral-gray);
+            font-weight: 600;
+            z-index: 1;
+        }
+        
+        .price-input .form-control {
+            padding-left: 2.5rem;
+        }
+        
+        .file-upload-container {
+            position: relative;
+            border: 2px dashed var(--background);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: var(--background);
+        }
+        
+        .file-upload-container:hover {
+            border-color: var(--primary-blue);
+            background: rgba(5, 118, 211, 0.05);
+        }
+        
+        .file-upload-container.dragover {
+            border-color: var(--primary-blue);
+            background: rgba(5, 118, 211, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .file-upload-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .file-upload-content {
+            pointer-events: none;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+        
+        .upload-text {
+            font-size: 1.1rem;
+            color: var(--black);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-hint {
+            font-size: 0.9rem;
+            color: var(--neutral-gray);
+        }
+        
+        .image-preview {
+            display: none;
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            max-width: 300px;
+            margin: 1rem auto 0;
+        }
+        
+        .preview-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        
+        .remove-image {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--error-red);
+            color: var(--white);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .remove-image:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+        
+        .error-message {
+            color: var(--error-red);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .success-message {
+            color: var(--success-green);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .character-count {
+            font-size: 0.8rem;
+            color: var(--neutral-gray);
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+        
+        .character-count.warning {
+            color: var(--accent-orange);
+        }
+        
+        .character-count.error {
+            color: var(--error-red);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--background);
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            min-width: 140px;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .btn-primary {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: var(--secondary-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(5, 118, 211, 0.3);
+        }
+        
+        .btn-secondary {
+            background: var(--background);
+            color: var(--neutral-gray);
+            border: 2px solid var(--background);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--white);
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .form-progress {
+            background: var(--background);
+            height: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-blue), var(--accent-orange));
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .form-title {
+                font-size: 2rem;
+            }
+            
+            .main-container {
+                padding: 0 1rem 2rem;
+            }
+            
+            .form-container {
+                padding: 1.5rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            color: var(--white);
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: var(--success-green);
+        }
+        
+        .notification.error {
+            background: var(--error-red);
+        }
+    </style>
 </head>
 <body>
-    <form action="{{ url_for('shop') }}">
-        <label for="product_name">Product Name:</label>
-        <input type="text" name="product_name" min="10" required> <br>
-        <label for="price">Product Price:</label>
-        <input type="text" name="price" required> <br>
-        <label for="product_image">Image For Product:</label>
-        <input type="file" accept="image/jpeg, image/png image/jpg" name="product_image" value="chose Image" required> <br>
-        <label for="description">Product Description:</label><br>
-        <textarea name="description" cols="30" rows="10" required></textarea> <br>
-        <input type="hidden" name="customer_id" value="{{ user.id }}">
-        <input type="submit">
-    </form>
-
-    <script src="{{ url_for('static' ,filename='js/productFormScript.js')}}"></script>
+    <div class="form-header">
+        <div class="header-content">
+            <nav class="form-nav">
+                <a href="{{ url_for('shop') }}" class="logo">tech<span>O</span>nline</a>
+                <div class="nav-links">
+                    <a href="{{ url_for('shop') }}"><i class="fas fa-store"></i> Shop</a>
+                    <a href="{{ url_for('customer_profile') }}"><i class="fas fa-user"></i> Profile</a>
+                    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </nav>
+            <h1 class="form-title">Add New Product</h1>
+            <p class="form-subtitle">Share your amazing products with the world</p>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <div class="form-card">
+            <div class="form-container">
+                <div class="form-progress">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                
+                <form id="productForm" action="{{ url_for('shop') }}" method="POST" enctype="multipart/form-data">
+                    <div class="form-grid">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="productName">
+                                    <i class="fas fa-tag"></i>
+                                    Product Name <span class="required">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="productName" name="product_name" 
+                                       placeholder="Enter product name" minlength="3" maxlength="100" required>
+                                <div class="error-message" id="nameError" style="display: none;">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span></span>
+                                </div>
+                                <div class="character-count" id="nameCount">0/100</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="productPrice">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    Price <span class="required">*</span>
+                                </label>
+                                <div class="price-input">
+                                    <input type="number" class="form-control" id="productPrice" name="price" 
+                                           placeholder="0.00" min="0.01" step="0.01" required>
+                                </div>
+                                <div class="error-message" id="priceError" style="display: none;">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label class="form-label" for="productImage">
+                                <i class="fas fa-image"></i>
+                                Product Image <span class="required">*</span>
+                            </label>
+                            <div class="file-upload-container" id="fileUploadContainer">
+                                <input type="file" class="file-upload-input" id="productImage" name="product_image" 
+                                       accept="image/jpeg,image/jpg,image/png,image/webp" required>
+                                <div class="file-upload-content">
+                                    <div class="upload-icon">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <div class="upload-text">Click to upload or drag and drop</div>
+                                    <div class="upload-hint">PNG, JPG, JPEG or WEBP (max 5MB)</div>
+                                </div>
+                            </div>
+                            <div class="image-preview" id="imagePreview">
+                                <img class="preview-image" id="previewImage" src="" alt="Preview">
+                                <button type="button" class="remove-image" id="removeImage">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="error-message" id="imageError" style="display: none;">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label class="form-label" for="productDescription">
+                                <i class="fas fa-align-left"></i>
+                                Description <span class="required">*</span>
+                            </label>
+                            <textarea class="form-control textarea-control" id="productDescription" name="description" 
+                                      placeholder="Describe your product in detail..." minlength="10" maxlength="1000" required></textarea>
+                            <div class="error-message" id="descriptionError" style="display: none;">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span></span>
+                            </div>
+                            <div class="character-count" id="descriptionCount">0/1000</div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="customer_id" value="{{ user.id }}">
+                    
+                    <div class="form-actions">
+                        <a href="{{ url_for('customer_profile') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <span class="btn-text">
+                                <i class="fas fa-plus"></i> Add Product
+                            </span>
+                            <div class="loading-spinner" id="loadingSpinner"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('productForm');
+            const progressBar = document.getElementById('progressBar');
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const btnText = submitBtn.querySelector('.btn-text');
+            
+            // Form fields
+            const productName = document.getElementById('productName');
+            const productPrice = document.getElementById('productPrice');
+            const productImage = document.getElementById('productImage');
+            const productDescription = document.getElementById('productDescription');
+            
+            // File upload elements
+            const fileUploadContainer = document.getElementById('fileUploadContainer');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImage = document.getElementById('previewImage');
+            const removeImage = document.getElementById('removeImage');
+            
+            // Character counters
+            const nameCount = document.getElementById('nameCount');
+            const descriptionCount = document.getElementById('descriptionCount');
+            
+            // Real-time validation
+            productName.addEventListener('input', function() {
+                validateField(this, 'nameError', 'Product name must be between 3-100 characters');
+                updateCharacterCount(this, nameCount, 100);
+                updateProgress();
+            });
+            
+            productPrice.addEventListener('input', function() {
+                validateField(this, 'priceError', 'Please enter a valid price');
+                updateProgress();
+            });
+            
+            productDescription.addEventListener('input', function() {
+                validateField(this, 'descriptionError', 'Description must be between 10-1000 characters');
+                updateCharacterCount(this, descriptionCount, 1000);
+                updateProgress();
+            });
+            
+            // File upload functionality
+            fileUploadContainer.addEventListener('click', function() {
+                productImage.click();
+            });
+            
+            fileUploadContainer.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            
+            fileUploadContainer.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+            
+            fileUploadContainer.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0]);
+                }
+            });
+            
+            productImage.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+            
+            removeImage.addEventListener('click', function() {
+                productImage.value = '';
+                imagePreview.style.display = 'none';
+                fileUploadContainer.style.display = 'block';
+                clearError('imageError');
+                updateProgress();
+            });
+            
+            function handleFileSelect(file) {
+                // Validate file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    showError('imageError', 'Please select a valid image file (PNG, JPG, JPEG, or WEBP)');
+                    return;
+                }
+                
+                // Validate file size (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showError('imageError', 'File size must be less than 5MB');
+                    return;
+                }
+                
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    fileUploadContainer.style.display = 'none';
+                    clearError('imageError');
+                    updateProgress();
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            function validateField(field, errorId, message) {
+                const value = field.value.trim();
+                let isValid = true;
+                
+                if (field.type === 'text' && field.hasAttribute('minlength')) {
+                    isValid = value.length >= parseInt(field.getAttribute('minlength')) && 
+                             value.length <= parseInt(field.getAttribute('maxlength'));
+                } else if (field.type === 'number') {
+                    isValid = value !== '' && parseFloat(value) > 0;
+                } else if (field.tagName === 'TEXTAREA') {
+                    isValid = value.length >= parseInt(field.getAttribute('minlength')) && 
+                             value.length <= parseInt(field.getAttribute('maxlength'));
+                }
+                
+                if (isValid) {
+                    field.classList.remove('error');
+                    field.classList.add('success');
+                    clearError(errorId);
+                } else {
+                    field.classList.remove('success');
+                    field.classList.add('error');
+                    showError(errorId, message);
+                }
+                
+                return isValid;
+            }
+            
+            function showError(errorId, message) {
+                const errorElement = document.getElementById(errorId);
+                errorElement.querySelector('span').textContent = message;
+                errorElement.style.display = 'flex';
+            }
+            
+            function clearError(errorId) {
+                const errorElement = document.getElementById(errorId);
+                errorElement.style.display = 'none';
+            }
+            
+            function updateCharacterCount(field, countElement, maxLength) {
+                const currentLength = field.value.length;
+                countElement.textContent = `${currentLength}/${maxLength}`;
+                
+                if (currentLength > maxLength * 0.9) {
+                    countElement.className = 'character-count error';
+                } else if (currentLength > maxLength * 0.7) {
+                    countElement.className = 'character-count warning';
+                } else {
+                    countElement.className = 'character-count';
+                }
+            }
+            
+            function updateProgress() {
+                let progress = 0;
+                const fields = [productName, productPrice, productDescription];
+                
+                fields.forEach(field => {
+                    if (field.value.trim() !== '' && !field.classList.contains('error')) {
+                        progress += 25;
+                    }
+                });
+                
+                // Check if image is uploaded
+                if (productImage.files.length > 0) {
+                    progress += 25;
+                }
+                
+                progressBar.style.width = progress + '%';
+            }
+            
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Validate all fields
+                let isValid = true;
+                isValid &= validateField(productName, 'nameError', 'Product name must be between 3-100 characters');
+                isValid &= validateField(productPrice, 'priceError', 'Please enter a valid price');
+                isValid &= validateField(productDescription, 'descriptionError', 'Description must be between 10-1000 characters');
+                
+                // Validate image
+                if (productImage.files.length === 0) {
+                    showError('imageError', 'Please select a product image');
+                    isValid = false;
+                }
+                
+                if (isValid) {
+                    // Show loading state
+                    submitBtn.disabled = true;
+                    btnText.style.display = 'none';
+                    loadingSpinner.style.display = 'block';
+                    
+                    // Simulate form submission delay
+                    setTimeout(() => {
+                        showNotification('Product added successfully!', 'success');
+                        // In real implementation, submit the form
+                        // form.submit();
+                        
+                        // Reset form for demo
+                        setTimeout(() => {
+                            form.reset();
+                            imagePreview.style.display = 'none';
+                            fileUploadContainer.style.display = 'block';
+                            progressBar.style.width = '0%';
+                            nameCount.textContent = '0/100';
+                            descriptionCount.textContent = '0/1000';
+                            
+                            // Reset button state
+                            submitBtn.disabled = false;
+                            btnText.style.display = 'flex';
+                            loadingSpinner.style.display = 'none';
+                            
+                            // Clear all field states
+                            document.querySelectorAll('.form-control').forEach(field => {
+                                field.classList.remove('error', 'success');
+                            });
+                            
+                            document.querySelectorAll('.error-message').forEach(error => {
+                                error.style.display = 'none';
+                            });
+                        }, 1500);
+                    }, 2000);
+                } else {
+                    showNotification('Please fix the errors before submitting', 'error');
+                }
+            });
+            
+            function showNotification(message, type) {
+                // Remove existing notifications
+                const existingNotifications = document.querySelectorAll('.notification');
+                existingNotifications.forEach(notification => notification.remove());
+                
+                // Create new notification
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                // Show notification
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 100);
+                
+                // Hide notification after 3 seconds
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, 3000);
+            }
+        });
+    </script>
 </body>
 </html>

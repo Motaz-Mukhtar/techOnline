@@ -2,32 +2,697 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{url_for('static', filename='css/signup.css')}}">
+    <title>TechOnline Admin Signup</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .signup-container {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+        
+        .signup-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--white);
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+        
+        .signup-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+            opacity: 0.1;
+        }
+        
+        .admin-logo {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .admin-logo span {
+            color: var(--accent-orange);
+        }
+        
+        .admin-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .signup-form {
+            padding: 2.5rem;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .form-title {
+            text-align: center;
+            color: var(--black);
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .form-label {
+            display: block;
+            color: var(--neutral-gray);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid var(--background);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--background);
+            color: var(--black);
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(5, 118, 211, 0.1);
+        }
+        
+        .form-control.error {
+            border-color: var(--error-red);
+            background: rgba(239, 68, 68, 0.05);
+        }
+        
+        .form-control.success {
+            border-color: var(--success-green);
+            background: rgba(16, 185, 129, 0.05);
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--neutral-gray);
+            font-size: 1.1rem;
+            z-index: 1;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .error-message {
+            color: var(--error-red);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+        
+        .success-message {
+            color: var(--success-green);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+        
+        .password-strength {
+            margin-top: 0.5rem;
+        }
+        
+        .strength-bar {
+            height: 4px;
+            background: var(--background);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        .strength-weak { background: var(--error-red); }
+        .strength-medium { background: var(--accent-orange); }
+        .strength-strong { background: var(--success-green); }
+        
+        .strength-text {
+            font-size: 0.8rem;
+            color: var(--neutral-gray);
+        }
+        
+        .signup-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .signup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(5, 118, 211, 0.3);
+        }
+        
+        .signup-btn:active {
+            transform: translateY(0);
+        }
+        
+        .signup-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-loading {
+            position: relative;
+        }
+        
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: var(--white);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--background);
+        }
+        
+        .login-link a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .login-link a:hover {
+            color: var(--secondary-blue);
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+        
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-red);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--neutral-gray);
+            cursor: pointer;
+            font-size: 1rem;
+            z-index: 2;
+        }
+        
+        .password-toggle:hover {
+            color: var(--primary-blue);
+        }
+        
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: var(--background);
+            border-radius: 8px;
+        }
+        
+        .terms-checkbox input[type="checkbox"] {
+            margin: 0;
+            transform: scale(1.2);
+        }
+        
+        .terms-text {
+            font-size: 0.9rem;
+            color: var(--neutral-gray);
+            line-height: 1.4;
+        }
+        
+        .terms-text a {
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+        
+        .terms-text a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            
+            .signup-form {
+                padding: 2rem 1.5rem;
+            }
+            
+            .signup-header {
+                padding: 1.5rem;
+            }
+            
+            .admin-logo {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    {% extends "layout.html" %}
-    {% block content %}
-    <div class="container">
-        <div>
-            <h4 class="text-center p-2 h4">sign-up</h4>
-            {% from "_formhelpers.html" import render_field %}
-            <form method=post>
+    <div class="signup-container">
+        <div class="signup-header">
+            <h1 class="admin-logo">tech<span>O</span>nline</h1>
+            <p class="admin-subtitle">Admin Registration</p>
+        </div>
+        
+        <div class="signup-form">
+            <h2 class="form-title">Create Admin Account</h2>
+            
+            {% include '_messages.html' %}
+            
+            <form method="post" id="signupForm" novalidate>
                 {{ form.csrf_token }}
-                <div>
-                    {{ render_field(form.first_name, class="form-control") }}
-                    {{ render_field(form.last_name, class="form-control") }}
-                    {{ render_field(form.email, class="form-control") }}
-                    {{ render_field(form.password, class="form-control") }}
-                    {{ render_field(form.confirm, class="form-control") }}
-                    {{ render_field(form.address, class="form-control") }}
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="first_name">First Name</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user input-icon"></i>
+                            {{ form.first_name(class="form-control", id="first_name", placeholder="Enter first name", required=true) }}
+                        </div>
+                        <div class="error-message" id="first_name-error"></div>
+                        <div class="success-message" id="first_name-success"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="last_name">Last Name</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user input-icon"></i>
+                            {{ form.last_name(class="form-control", id="last_name", placeholder="Enter last name", required=true) }}
+                        </div>
+                        <div class="error-message" id="last_name-error"></div>
+                        <div class="success-message" id="last_name-success"></div>
+                    </div>
                 </div>
-                <a href="{{ url_for('login') }}">I have account</a>
-                <p><input type="submit" value="sign up" class="btn-info">
+                
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope input-icon"></i>
+                        {{ form.email(class="form-control", id="email", placeholder="Enter your email", required=true) }}
+                    </div>
+                    <div class="error-message" id="email-error"></div>
+                    <div class="success-message" id="email-success"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon"></i>
+                        {{ form.password(class="form-control", id="password", placeholder="Create a strong password", required=true) }}
+                        <button type="button" class="password-toggle" id="passwordToggle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength" id="passwordStrength" style="display: none;">
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strengthFill"></div>
+                        </div>
+                        <div class="strength-text" id="strengthText"></div>
+                    </div>
+                    <div class="error-message" id="password-error"></div>
+                    <div class="success-message" id="password-success"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="confirm">Confirm Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon"></i>
+                        {{ form.confirm(class="form-control", id="confirm", placeholder="Confirm your password", required=true) }}
+                        <button type="button" class="password-toggle" id="confirmToggle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="error-message" id="confirm-error"></div>
+                    <div class="success-message" id="confirm-success"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="address">Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-map-marker-alt input-icon"></i>
+                        {{ form.address(class="form-control", id="address", placeholder="Enter your address", required=true) }}
+                    </div>
+                    <div class="error-message" id="address-error"></div>
+                    <div class="success-message" id="address-success"></div>
+                </div>
+                
+                <div class="terms-checkbox">
+                    <input type="checkbox" id="terms" required>
+                    <div class="terms-text">
+                        I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>. I understand that this admin account requires approval from the system administrator.
+                    </div>
+                </div>
+                
+                <button type="submit" class="signup-btn" id="signupBtn" disabled>
+                    <span id="btnText">Create Admin Account</span>
+                </button>
             </form>
+            
+            <div class="login-link">
+                <p>Already have an admin account? <a href="{{ url_for('admin.login') }}">Sign In</a></p>
+            </div>
         </div>
     </div>
-    {% endblock content %}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('signupForm');
+            const inputs = {
+                firstName: document.getElementById('first_name'),
+                lastName: document.getElementById('last_name'),
+                email: document.getElementById('email'),
+                password: document.getElementById('password'),
+                confirm: document.getElementById('confirm'),
+                address: document.getElementById('address')
+            };
+            const signupBtn = document.getElementById('signupBtn');
+            const btnText = document.getElementById('btnText');
+            const termsCheckbox = document.getElementById('terms');
+            const passwordToggle = document.getElementById('passwordToggle');
+            const confirmToggle = document.getElementById('confirmToggle');
+            const strengthIndicator = document.getElementById('passwordStrength');
+            const strengthFill = document.getElementById('strengthFill');
+            const strengthText = document.getElementById('strengthText');
+            
+            // Password visibility toggles
+            passwordToggle.addEventListener('click', function() {
+                togglePasswordVisibility(inputs.password, this);
+            });
+            
+            confirmToggle.addEventListener('click', function() {
+                togglePasswordVisibility(inputs.confirm, this);
+            });
+            
+            function togglePasswordVisibility(input, button) {
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                
+                const icon = button.querySelector('i');
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            }
+            
+            // Real-time validation
+            Object.keys(inputs).forEach(key => {
+                const input = inputs[key];
+                input.addEventListener('input', () => validateField(key));
+                input.addEventListener('blur', () => validateField(key));
+            });
+            
+            inputs.password.addEventListener('input', updatePasswordStrength);
+            termsCheckbox.addEventListener('change', updateSubmitButton);
+            
+            function validateField(fieldName) {
+                const input = inputs[fieldName];
+                const value = input.value.trim();
+                const errorDiv = document.getElementById(`${fieldName.replace(/([A-Z])/g, '_$1').toLowerCase()}-error`);
+                const successDiv = document.getElementById(`${fieldName.replace(/([A-Z])/g, '_$1').toLowerCase()}-success`);
+                
+                let isValid = false;
+                let message = '';
+                
+                switch(fieldName) {
+                    case 'firstName':
+                    case 'lastName':
+                        if (!value) {
+                            message = `${fieldName === 'firstName' ? 'First' : 'Last'} name is required`;
+                        } else if (value.length < 2) {
+                            message = 'Name must be at least 2 characters';
+                        } else {
+                            isValid = true;
+                            message = 'Looks good!';
+                        }
+                        break;
+                        
+                    case 'email':
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!value) {
+                            message = 'Email is required';
+                        } else if (!emailRegex.test(value)) {
+                            message = 'Please enter a valid email address';
+                        } else {
+                            isValid = true;
+                            message = 'Valid email address';
+                        }
+                        break;
+                        
+                    case 'password':
+                        if (!value) {
+                            message = 'Password is required';
+                        } else if (value.length < 8) {
+                            message = 'Password must be at least 8 characters';
+                        } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value)) {
+                            message = 'Password must contain uppercase, lowercase, and number';
+                        } else {
+                            isValid = true;
+                            message = 'Strong password!';
+                        }
+                        break;
+                        
+                    case 'confirm':
+                        if (!value) {
+                            message = 'Please confirm your password';
+                        } else if (value !== inputs.password.value) {
+                            message = 'Passwords do not match';
+                        } else {
+                            isValid = true;
+                            message = 'Passwords match!';
+                        }
+                        break;
+                        
+                    case 'address':
+                        if (!value) {
+                            message = 'Address is required';
+                        } else if (value.length < 10) {
+                            message = 'Please enter a complete address';
+                        } else {
+                            isValid = true;
+                            message = 'Address looks good!';
+                        }
+                        break;
+                }
+                
+                if (isValid) {
+                    showSuccess(input, successDiv, message);
+                    hideError(errorDiv);
+                } else {
+                    showError(input, errorDiv, message);
+                    hideSuccess(successDiv);
+                }
+                
+                updateSubmitButton();
+                return isValid;
+            }
+            
+            function updatePasswordStrength() {
+                const password = inputs.password.value;
+                let strength = 0;
+                let strengthClass = '';
+                let strengthLabel = '';
+                
+                if (password.length >= 8) strength++;
+                if (/[a-z]/.test(password)) strength++;
+                if (/[A-Z]/.test(password)) strength++;
+                if (/\d/.test(password)) strength++;
+                if (/[^\w\s]/.test(password)) strength++;
+                
+                if (password.length === 0) {
+                    strengthIndicator.style.display = 'none';
+                    return;
+                }
+                
+                strengthIndicator.style.display = 'block';
+                
+                if (strength <= 2) {
+                    strengthClass = 'strength-weak';
+                    strengthLabel = 'Weak';
+                } else if (strength <= 3) {
+                    strengthClass = 'strength-medium';
+                    strengthLabel = 'Medium';
+                } else {
+                    strengthClass = 'strength-strong';
+                    strengthLabel = 'Strong';
+                }
+                
+                strengthFill.className = `strength-fill ${strengthClass}`;
+                strengthFill.style.width = `${(strength / 5) * 100}%`;
+                strengthText.textContent = `Password strength: ${strengthLabel}`;
+            }
+            
+            function showError(input, errorDiv, message) {
+                input.classList.add('error');
+                input.classList.remove('success');
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+            
+            function showSuccess(input, successDiv, message) {
+                input.classList.add('success');
+                input.classList.remove('error');
+                successDiv.textContent = message;
+                successDiv.style.display = 'block';
+            }
+            
+            function hideError(errorDiv) {
+                errorDiv.style.display = 'none';
+            }
+            
+            function hideSuccess(successDiv) {
+                successDiv.style.display = 'none';
+            }
+            
+            function updateSubmitButton() {
+                const allValid = Object.keys(inputs).every(key => {
+                    const input = inputs[key];
+                    return input.classList.contains('success') || (input.value.trim() && !input.classList.contains('error'));
+                });
+                
+                const termsAccepted = termsCheckbox.checked;
+                signupBtn.disabled = !(allValid && termsAccepted);
+            }
+            
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const allValid = Object.keys(inputs).every(key => validateField(key));
+                
+                if (allValid && termsCheckbox.checked) {
+                    // Show loading state
+                    signupBtn.classList.add('btn-loading');
+                    signupBtn.disabled = true;
+                    btnText.textContent = 'Creating Account...';
+                    
+                    // Submit form after a short delay to show loading state
+                    setTimeout(() => {
+                        form.submit();
+                    }, 500);
+                } else {
+                    // Shake animation for invalid form
+                    form.style.animation = 'shake 0.5s';
+                    setTimeout(() => {
+                        form.style.animation = '';
+                    }, 500);
+                }
+            });
+        });
+        
+        // Add shake animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>

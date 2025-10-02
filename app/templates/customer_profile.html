@@ -2,39 +2,728 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>techOnline | Profile</title>
+    <title>TechOnline | My Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: var(--background);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--white);
+            padding: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+            opacity: 0.1;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .profile-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--white);
+            text-decoration: none;
+        }
+        
+        .logo span {
+            color: var(--accent-orange);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent-orange);
+        }
+        
+        .profile-title {
+            text-align: center;
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: -3rem auto 0;
+            padding: 0 2rem 2rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .profile-card {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .profile-info {
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .profile-avatar {
+            position: relative;
+        }
+        
+        .avatar-container {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid var(--primary-blue);
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .avatar-container:hover {
+            transform: scale(1.05);
+        }
+        
+        .avatar-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .avatar-upload {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--accent-orange);
+            color: var(--white);
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .avatar-upload:hover {
+            background: var(--secondary-blue);
+        }
+        
+        .profile-details h2 {
+            color: var(--black);
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .profile-details p {
+            color: var(--neutral-gray);
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+        }
+        
+        .profile-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--neutral-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(5, 118, 211, 0.3);
+        }
+        
+        .btn-secondary {
+            background: var(--background);
+            color: var(--neutral-gray);
+            border: 2px solid var(--background);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--white);
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+        
+        .btn-success {
+            background: var(--success-green);
+            color: var(--white);
+        }
+        
+        .btn-success:hover {
+            background: #0d9668;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: var(--error-red);
+            color: var(--white);
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+        
+        .edit-form {
+            padding: 2rem;
+            background: var(--background);
+            display: none;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .form-label {
+            color: var(--neutral-gray);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-control {
+            padding: 1rem;
+            border: 2px solid var(--background);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+            color: var(--black);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(5, 118, 211, 0.1);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        
+        .products-section {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--white);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .add-product-btn {
+            background: var(--accent-orange);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .add-product-btn:hover {
+            background: #d97706;
+            transform: translateY(-1px);
+        }
+        
+        .products-grid {
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .product-card {
+            background: var(--background);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: var(--primary-blue);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: var(--white);
+        }
+        
+        .product-info {
+            padding: 1.5rem;
+        }
+        
+        .product-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--black);
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .product-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin: 0 0 1rem 0;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            flex: 1;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--neutral-gray);
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .empty-message {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-description {
+            margin-bottom: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .profile-info {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 1.5rem;
+            }
+            
+            .profile-stats {
+                justify-content: center;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .profile-title {
+                font-size: 2rem;
+            }
+            
+            .main-container {
+                padding: 0 1rem 2rem;
+            }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            color: var(--white);
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: var(--success-green);
+        }
+        
+        .notification.error {
+            background: var(--error-red);
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <img src="{{ url_for('static', filename='images/hFna7--L_400x400.jpg') }}" alt="">
-        <div class="form-container">
-            <button class="edit_button">Edit</button>
-            <form action="{{ url_for('customer_profile') }}" data-id = "{{ user.to_dict().id }}" class="profile_form">
-                <label for="first_name">First Name:</label>
-                <input type="text" value="{{ user.to_dict().first_name }}" name="first_name" disabled>
-                <label for="last_name">Last Name:</label>
-                <input type="text" value="{{ user.to_dict().last_name }}" name="last_name" disabled>
-                <label for="email">Email:</label>
-                <input type="email" value="{{ user.to_dict().email }}" name="email" disabled>
-                <input type="submit" value="Save" class="submit_button" style="display: none;">
-            </form>
-            <button style="display: none;" class="cancel_button">
-                <a href="{{ url_for('customer_profile') }}" style="color: black; text-decoration: none;">Cancel</a>
-            </button>
-        </div>
-
-        <div class="customer-products-container">
-            <h1>My Products</h1>
-            {% for product in user.products %}
-            <div class="product-container">
-                <h2>{{ product.product_name }}</h2>
-                <img src="{{ product.product_image }}" alt="">
-            </div>
-            {% endfor %}
+    <div class="profile-header">
+        <div class="header-content">
+            <nav class="profile-nav">
+                <a href="{{ url_for('shop') }}" class="logo">tech<span>O</span>nline</a>
+                <div class="nav-links">
+                    <a href="{{ url_for('shop') }}"><i class="fas fa-store"></i> Shop</a>
+                    <a href="{{ url_for('product_form') }}"><i class="fas fa-plus"></i> Add Product</a>
+                    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </nav>
+            <h1 class="profile-title">My Profile</h1>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='js/customerProfile.js') }}"></script>
+    
+    <div class="main-container">
+        <div class="profile-card">
+            <div class="profile-info" id="profileInfo">
+                <div class="profile-avatar">
+                    <div class="avatar-container">
+                        <img src="{{ url_for('static', filename='images/hFna7--L_400x400.jpg') }}" alt="Profile Avatar" id="avatarImage">
+                        <button class="avatar-upload" onclick="document.getElementById('avatarInput').click()">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                        <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                    </div>
+                </div>
+                
+                <div class="profile-details">
+                    <h2 id="displayName">{{ user.to_dict().first_name }} {{ user.to_dict().last_name }}</h2>
+                    <p id="displayEmail"><i class="fas fa-envelope"></i> {{ user.to_dict().email }}</p>
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">{{ user.products|length }}</span>
+                            <span class="stat-label">Products</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">4.8</span>
+                            <span class="stat-label">Rating</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">156</span>
+                            <span class="stat-label">Sales</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-actions">
+                    <button class="btn btn-primary" id="editBtn">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                    <a href="{{ url_for('product_form') }}" class="btn btn-secondary">
+                        <i class="fas fa-plus"></i> Add Product
+                    </a>
+                </div>
+            </div>
+            
+            <div class="edit-form" id="editForm">
+                <form id="profileForm" data-id="{{ user.to_dict().id }}">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="firstName">First Name</label>
+                            <input type="text" class="form-control" id="firstName" name="first_name" value="{{ user.to_dict().first_name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="lastName">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" name="last_name" value="{{ user.to_dict().last_name }}" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label" for="email">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ user.to_dict().email }}" required>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelBtn">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="products-section">
+            <div class="section-header">
+                <h2 class="section-title">My Products</h2>
+                <button class="add-product-btn" onclick="window.location.href='{{ url_for('product_form') }}'">
+                    <i class="fas fa-plus"></i> Add New Product
+                </button>
+            </div>
+            
+            {% if user.products %}
+            <div class="products-grid">
+                {% for product in user.products %}
+                <div class="product-card">
+                    <img src="{{ product.product_image }}" alt="{{ product.product_name }}" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-name">{{ product.product_name }}</h3>
+                        <p class="product-price">${{ "%.2f"|format(product.product_price|float) }}</p>
+                        <div class="product-actions">
+                            <button class="btn btn-primary btn-sm" onclick="editProduct({{ product.id }})">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteProduct({{ product.id }})">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <h3 class="empty-message">No Products Yet</h3>
+                <p class="empty-description">Start selling by adding your first product to the marketplace.</p>
+                <button class="btn btn-primary" onclick="window.location.href='{{ url_for('product_form') }}'">
+                    <i class="fas fa-plus"></i> Add Your First Product
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const editBtn = document.getElementById('editBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const profileInfo = document.getElementById('profileInfo');
+            const editForm = document.getElementById('editForm');
+            const profileForm = document.getElementById('profileForm');
+            const avatarInput = document.getElementById('avatarInput');
+            const avatarImage = document.getElementById('avatarImage');
+            
+            // Edit profile functionality
+            editBtn.addEventListener('click', function() {
+                profileInfo.style.display = 'none';
+                editForm.style.display = 'block';
+            });
+            
+            cancelBtn.addEventListener('click', function() {
+                profileInfo.style.display = 'grid';
+                editForm.style.display = 'none';
+                // Reset form values
+                profileForm.reset();
+            });
+            
+            // Avatar upload functionality
+            avatarInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        avatarImage.src = e.target.result;
+                        showNotification('Avatar updated successfully!', 'success');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Form submission
+            profileForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const userId = this.dataset.id;
+                
+                // Simulate API call
+                setTimeout(() => {
+                    // Update display values
+                    const firstName = formData.get('first_name');
+                    const lastName = formData.get('last_name');
+                    const email = formData.get('email');
+                    
+                    document.getElementById('displayName').textContent = `${firstName} ${lastName}`;
+                    document.getElementById('displayEmail').innerHTML = `<i class="fas fa-envelope"></i> ${email}`;
+                    
+                    // Switch back to view mode
+                    profileInfo.style.display = 'grid';
+                    editForm.style.display = 'none';
+                    
+                    showNotification('Profile updated successfully!', 'success');
+                }, 500);
+            });
+        });
+        
+        function editProduct(productId) {
+            // Redirect to product edit page
+            window.location.href = `/product/edit/${productId}`;
+        }
+        
+        function deleteProduct(productId) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                // Simulate API call
+                fetch(`/api/products/${productId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Remove product card from DOM
+                        const productCard = event.target.closest('.product-card');
+                        productCard.remove();
+                        showNotification('Product deleted successfully!', 'success');
+                    } else {
+                        showNotification('Failed to delete product. Please try again.', 'error');
+                    }
+                })
+                .catch(error => {
+                    showNotification('An error occurred. Please try again.', 'error');
+                });
+            }
+        }
+        
+        function showNotification(message, type) {
+            // Remove existing notifications
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notification => notification.remove());
+            
+            // Create new notification
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            // Hide notification after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
