@@ -26,7 +26,7 @@ from flask import jsonify, abort, make_response, request
 
 
 @app_views.route('/orders', methods=['GET', 'POST'], strict_slashes=False) # type: ignore
-@optional_auth
+@optional_auth()
 def handle_orders():
     """
     Handle order operations.
@@ -300,7 +300,7 @@ def create_order_from_cart(cart_id, customer_id=None):
 
 
 @app_views.route('/orders/<order_id>', methods=['GET', 'PUT', 'DELETE'], strict_slashes=False) # type: ignore
-@require_auth
+@require_auth()
 def handle_order(order_id):
     """
     Handle individual order operations.
@@ -388,7 +388,7 @@ def handle_order(order_id):
 
 
 @app_views.route('/orders/<order_id>/status', methods=['PUT'], strict_slashes=False) # type: ignore
-@require_auth
+@require_auth()
 def update_order_status(order_id):
     """
     Update the status of a specific order with proper workflow validation.
@@ -493,7 +493,7 @@ def update_order_status(order_id):
 
 
 @app_views.route('/customers/<customer_id>/orders', methods=['GET'], strict_slashes=False) # type: ignore
-@require_auth
+@require_auth()
 def get_customer_orders(customer_id):
     """
     Get order history for a specific customer.
@@ -550,7 +550,7 @@ def get_customer_orders(customer_id):
 
 
 @app_views.route('/orders/<order_id>/items', methods=['GET'], strict_slashes=False) # type: ignore
-@require_auth
+@require_auth()
 def get_order_items(order_id):
     """
     Get all items in a specific order.
@@ -581,7 +581,7 @@ def get_order_items(order_id):
 
 
 @app_views.route('/orders/stats', methods=['GET'], strict_slashes=False) # type: ignore
-@require_admin
+@require_admin()
 def get_order_statistics():
     """
     Get order statistics and analytics.
@@ -643,7 +643,7 @@ def get_order_statistics():
 
 
 @app_views.route('/orders/search', methods=['GET'], strict_slashes=False) # type: ignore
-@require_auth
+@require_auth()
 def search_orders():
     """
     Search orders by various criteria.
@@ -712,7 +712,7 @@ def search_orders():
 
 
 @app_views.route('/orders/bulk', methods=['PUT'], strict_slashes=False) # type: ignore
-@require_admin
+@require_admin()
 def bulk_update_orders():
     """
     Bulk update multiple orders with proper workflow validation.
@@ -863,7 +863,7 @@ def bulk_update_orders():
 
 
 @app_views.route('/orders/<order_id>/payment', methods=['POST'], strict_slashes=False) # type: ignore
-@require_auth
+@require_auth()
 def process_order_payment(order_id):
     """
     Process payment for an order (mock payment processing).

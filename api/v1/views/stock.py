@@ -20,7 +20,7 @@ from flask import jsonify, abort, make_response, request
 
 
 @app_views.route('/stock/check/<product_id>', methods=['GET'], strict_slashes=False)  # type: ignore
-@optional_auth
+@optional_auth()
 def check_product_stock(product_id):
     """
     Check stock availability for a specific product.
@@ -61,7 +61,7 @@ def check_product_stock(product_id):
 
 
 @app_views.route('/stock/check/bulk', methods=['POST'], strict_slashes=False)  # type: ignore
-@optional_auth
+@optional_auth()
 def check_multiple_products_stock():
     """
     Check stock availability for multiple products.
@@ -134,7 +134,7 @@ def check_multiple_products_stock():
 
 
 @app_views.route('/stock/reserve', methods=['POST'], strict_slashes=False)  # type: ignore
-@require_admin
+@require_admin()
 def reserve_stock():
     """
     Reserve stock for a product (admin only).
@@ -200,7 +200,7 @@ def reserve_stock():
 
 
 @app_views.route('/stock/release', methods=['POST'], strict_slashes=False)  # type: ignore
-@require_admin
+@require_admin()
 def release_stock():
     """
     Release previously reserved stock (admin only).
@@ -266,7 +266,7 @@ def release_stock():
 
 
 @app_views.route('/stock/adjust', methods=['PUT'], strict_slashes=False)  # type: ignore
-@require_admin
+@require_admin()
 def adjust_stock():
     """
     Adjust stock quantity for a product (admin only).
@@ -331,7 +331,7 @@ def adjust_stock():
 
 
 @app_views.route('/stock/low-stock', methods=['GET'], strict_slashes=False)  # type: ignore
-@require_admin
+@require_admin()
 def get_low_stock_products():
     """
     Get products with low stock levels (admin only).
@@ -368,7 +368,7 @@ def get_low_stock_products():
 
 
 @app_views.route('/stock/out-of-stock', methods=['GET'], strict_slashes=False)  # type: ignore
-@require_admin
+@require_admin()
 def get_out_of_stock_products():
     """
     Get products that are out of stock (admin only).
@@ -398,7 +398,7 @@ def get_out_of_stock_products():
 
 
 @app_views.route('/stock/summary', methods=['GET'], strict_slashes=False)  # type: ignore
-@require_admin
+@require_admin()
 def get_stock_summary():
     """
     Get overall stock summary and statistics (admin only).

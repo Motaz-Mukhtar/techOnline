@@ -17,6 +17,17 @@ from werkzeug.utils import secure_filename
 import mimetypes
 
 
+def get_admin_api_key():
+    """
+    Get the admin API key for making administrative API calls.
+    
+    Returns:
+        str: Admin API key
+    """
+    # Use the hardcoded admin API key from the API server
+    return 'admin_key_123'
+
+
 def img_url(product_id):
     """
     Generate URL for product image by ID.
@@ -41,45 +52,122 @@ def img_url(product_id):
 @login_required
 def shop():
     """
-    Handle shop page with product search functionality.
+    Handle shop page with product search functionality using API endpoints.
     
-    GET: Display shop page with all products
-    POST: Search for products by name and display results
+    GET: Display shop page with all products from API
+    POST: Search for products by name using API and display results
     
     Returns:
-        Rendered shop template with products or search results
+        Rendered shop template with products or search results from API
     """
-    if request.method == 'POST':
-        product_name = request.form.get('product_name', '').strip()
+    try:
+        if request.method == 'POST':
+            product_name = request.form.get('product_name', '').strip()
+            
+            if product_name:
+                # Search products using API with search parameter
+                api_url = 'http://127.0.0.1:5001/api/v1/products'
+                params = {'search': product_name}
+                
+                response = requests.get(api_url, params=params, timeout=10)
+                
+                if response.status_code == 200:
+                    api_data = response.json()
+                    products_data = api_data.get('data', [])
+                    
+                    # Convert API response to Product-like objects for template compatibility
+                    matching_products = []
+                    for product_dict in products_data:
+                        # Create a simple object that mimics Product attributes
+                        class ProductProxy:
+                            def __init__(self, data):
+                                self.id = data.get('id')
+                                self.product_name = data.get('product_name')
+                                self.description = data.get('description')
+                                self.price = data.get('price')
+                                self.product_image = data.get('product_image')
+                                self.customer_id = data.get('customer_id')
+                        
+                        matching_products.append(ProductProxy(product_dict))
+                    
+                    return render_template('layout.html', products=matching_products, search_query=product_name)
+                else:
+                    flash(f'Error fetching search results: {response.status_code}', 'error')
+                    # Fallback to empty results
+                    return render_template('layout.html', products=[], search_query=product_name)
+            else:
+                # If no search query, get all products from API
+                api_url = 'http://127.0.0.1:5001/api/v1/products'
+                response = requests.get(api_url, timeout=10)
+                
+                if response.status_code == 200:
+                    api_data = response.json()
+                    products_data = api_data.get('data', [])
+                    
+                    # Convert API response to Product-like objects
+                    products_list = []
+                    for product_dict in products_data:
+                        class ProductProxy:
+                            def __init__(self, data):
+                                self.id = data.get('id')
+                                self.product_name = data.get('product_name')
+                                self.description = data.get('description')
+                                self.price = data.get('price')
+                                self.product_image = data.get('product_image')
+                                self.customer_id = data.get('customer_id')
+                        
+                        products_list.append(ProductProxy(product_dict))
+                    
+                    return render_template('layout.html', products=products_list)
+                else:
+                    flash(f'Error fetching products: {response.status_code}', 'error')
+                    return render_template('layout.html', products=[])
         
-        if product_name:
-            # Search products by name (case-insensitive)
-            products_list = storage.all(Product).values()
-            matching_products = []
+        # GET request - get all products from API
+        api_url = 'http://127.0.0.1:5001/api/v1/products'
+        response = requests.get(api_url, timeout=10)
+        
+        if response.status_code == 200:
+            api_data = response.json()
+            products_data = api_data.get('data', [])
             
-            for product in products_list:
-                if product_name.lower() in product.product_name.lower():
-                    matching_products.append(product)
+            # Convert API response to Product-like objects
+            products_list = []
+            for product_dict in products_data:
+                class ProductProxy:
+                    def __init__(self, data):
+                        self.id = data.get('id')
+                        self.product_name = data.get('product_name')
+                        self.description = data.get('description')
+                        self.price = data.get('price')
+                        self.product_image = data.get('product_image')
+                        self.customer_id = data.get('customer_id')
+                
+                products_list.append(ProductProxy(product_dict))
             
-            return render_template('layout.html', products=matching_products, search_query=product_name)
-        else:
-            # If no search query, show all products
-            products_list = list(storage.all(Product).values())
             return render_template('layout.html', products=products_list)
-    
-    # GET request - show all products
-    products_list = list(storage.all(Product).values())
-    return render_template('layout.html', products=products_list)
+        else:
+            flash(f'Error fetching products: {response.status_code}', 'error')
+            return render_template('layout.html', products=[])
+            
+    except requests.exceptions.RequestException as e:
+        flash(f'API connection error: {str(e)}', 'error')
+        # Fallback to direct database access if API is unavailable
+        products_list = list(storage.all(Product).values())
+        return render_template('layout.html', products=products_list)
+    except Exception as e:
+        flash(f'Unexpected error: {str(e)}', 'error')
+        return render_template('layout.html', products=[])
 
 
 @app.route('/shop/product_form', methods=['GET', 'POST'], strict_slashes=False)
 @login_required
 def product_form():
     """
-    Handle product form submission and display.
+    Handle product form submission and display using API endpoints.
     
     GET: Display the product creation form
-    POST: Process form data, validate inputs, handle image upload, and create new product
+    POST: Process form data, validate inputs, handle image upload, and create new product via API
     
     Returns:
         GET: Rendered product form template
@@ -92,6 +180,9 @@ def product_form():
             price = request.form.get('price', '').strip()
             description = request.form.get('description', '').strip()
             customer_id = request.form.get('customer_id')
+            category_id = request.form.get('category_id', '1')  # Default category
+            stock_quantity = request.form.get('stock_quantity', '10')  # Default stock
+            min_stock_level = request.form.get('min_stock_level', '5')  # Default min stock
             
             # Validate required fields
             if not all([product_name, price, description, customer_id]):
@@ -108,43 +199,65 @@ def product_form():
                 flash('Price must be a valid number!', 'error')
                 return render_template('product_form.html', user=current_user.to_dict())
             
-            # Create new product first
-            new_product = Product(
-                product_name=product_name,
-                description=description,
-                price=price_float,
-                customer_id=customer_id
-            )
+            # Prepare form data for API
+            form_data = {
+                'product_name': product_name,
+                'description': description,
+                'price': str(price_float),
+                'customer_id': customer_id,
+                'category_id': category_id,
+                'stock_quantity': stock_quantity,
+                'min_stock_level': min_stock_level
+            }
             
-            # Save to database to get product ID
-            new_product.save()
-            
-            # Handle image upload after product creation
+            # Handle file upload
+            files = {}
             if 'product_image' in request.files:
                 file = request.files['product_image']
                 if file and file.filename:
-                    # Save uploaded file using the new file handler
-                    result = save_uploaded_file(file, 'product', new_product.id)
-                    
-                    if result['success']:
-                        # Update product with image information
-                        new_product.product_image = result['url']
-                        new_product.product_image_filename = result['filename']
-                        new_product.save()
+                    files['product_image'] = (file.filename, file.stream, file.content_type)
+            
+            # Get admin API key for API authentication
+            api_key = get_admin_api_key()
+            if not api_key:
+                flash('Authentication failed. Please try again.', 'error')
+                return redirect(url_for('product_form'))
+            
+            # Create product via API
+            api_url = 'http://127.0.0.1:5001/api/v1/products'
+            headers = {'Authorization': f'API-Key {api_key}'}
+            
+            if files:
+                # Send multipart form data with file
+                response = requests.post(api_url, data=form_data, files=files, headers=headers, timeout=30)
+            else:
+                # Send JSON data
+                headers['Content-Type'] = 'application/json'
+                response = requests.post(api_url, json=form_data, headers=headers, timeout=30)
+            
+            if response.status_code == 201:
+                api_data = response.json()
+                flash(f'Product "{product_name}" created successfully!', 'success')
+                return redirect(url_for('shop'))
+            else:
+                # Handle API errors
+                try:
+                    error_data = response.json()
+                    error_message = error_data.get('message', f'API Error: {response.status_code}')
+                    if 'field_errors' in error_data:
+                        for field, errors in error_data['field_errors'].items():
+                            for error in errors:
+                                flash(f'{field}: {error}', 'error')
                     else:
-                        # Delete the product if image upload failed
-                        new_product.delete()
-                        flash(f'Product image upload failed: {result["error"]}', 'error')
-                        return render_template('product_form.html', user=current_user.to_dict())
-                else:
-                    flash('Please select an image file!', 'error')
-                    new_product.delete()
-                    return render_template('product_form.html', user=current_user.to_dict())
-
+                        flash(f'Error creating product: {error_message}', 'error')
+                except:
+                    flash(f'Error creating product: HTTP {response.status_code}', 'error')
+                
+                return render_template('product_form.html', user=current_user.to_dict())
             
-            flash(f'Product "{product_name}" created successfully!', 'success')
-            return redirect(url_for('shop'))
-            
+        except requests.exceptions.RequestException as e:
+            flash(f'Error connecting to API: {str(e)}', 'error')
+            return render_template('product_form.html', user=current_user.to_dict())
         except Exception as e:
             flash(f'Error creating product: {str(e)}', 'error')
             return render_template('product_form.html', user=current_user.to_dict())

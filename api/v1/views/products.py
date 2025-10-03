@@ -168,7 +168,7 @@ def modify_product(product_id):
             validator = BusinessRuleValidator()
             validation_result = validator.validate_product_data(data, db_session=storage)
             
-            if not validation_result['is_valid']:
+            if not validation_result['valid']:
                 field_errors = error_handler.create_field_errors_dict(validation_result)
                 return error_handler.validation_error_response(
                     message="Product validation failed",
@@ -323,10 +323,10 @@ def add_product():
             data = request.form.to_dict()
         
         # Validate product data using BusinessRuleValidator
-        validator = BusinessRuleValidator(db_session=storage.get_session())
-        validation_result = validator.validate_product_data(data, db_session=storage)
+        validator = BusinessRuleValidator(db_session=None)
+        validation_result = validator.validate_product_data(data)
         
-        if not validation_result['is_valid']:
+        if not validation_result['valid']:
             field_errors = error_handler.create_field_errors_dict(validation_result)
             return error_handler.validation_error_response(
                 message="Product validation failed",
@@ -387,6 +387,12 @@ def add_product():
             )
         
         # Create product instance
+        # For admin users, we'll use a special admin customer_id or allow NULL
+        current_user_id = get_current_user_id()
+        if current_user_id is None and is_admin():
+            # For admin API key users, use a special admin customer ID
+            current_user_id = 'admin_user'
+        
         product_data = {
             'product_name': data['product_name'].strip(),
             'description': data['description'].strip(),
@@ -394,7 +400,7 @@ def add_product():
             'category_id': data['category_id'],
             'stock_quantity': stock_quantity,
             'min_stock_level': min_stock_level,
-            'customer_id': get_current_user_id()  # Set to current admin user
+            'customer_id': current_user_id
         }
         
         product_instance = Product(**product_data)

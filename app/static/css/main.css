@@ -39,26 +39,37 @@ html {
 }
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background);
+    line-height: 1.6;
 }
 /* Global Rules End */
 nav {
-    background-color: var(--second-main-color);
-    padding: 20px 30px;
+    background-color: var(--white);
+    padding: 20px 50px;
     display: flex;
     justify-content: space-between;
-    font-size: 20px;
+    align-items: center;
+    font-size: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-nav h1 {
-    color: var(--third-main-color);
-    font-size: 45px;
+nav h1,
+.logo {
+    color: var(--black);
+    font-size: 32px;
     font-weight: 900;
     user-select: none;
     cursor: pointer;
+    margin: 0;
+    text-decoration: none;
 }
 
-nav h1 span {
+nav h1 span,
+.logo span {
     color: var(--accent-orange);
 }
 
@@ -68,44 +79,35 @@ nav ul {
 }
 
 nav ul a {
-    color: var(--main-color);
+    color: var(--neutral-gray);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+nav ul a:hover {
+    color: var(--primary-blue);
 }
 
 nav ul li.button a {
-    color: var(--third-main-color);
+    color: var(--white);
 }
 
 nav ul li {
-    margin: 0px 40px;
-    text-decoration: underline;
-}
-
-nav ul li:hover a
-{
-    text-decoration: none;
-    cursor: pointer;
+    margin: 0px 30px;
 }
 
 nav ul li.button {
-    background-color: var(--main-color);
-    padding: 5px 10px;
-    border: 3px solid transparent;
-    text-decoration: none;
-    text-decoration: underline;
+    background-color: var(--primary-blue);
+    padding: 12px 24px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
-nav ul li.button:hover
-{
-    border: 3px solid var(--second-main-color);
-    background-color: transparent;
-    border-color: var(--main-color);
-    color: var(--third-main-color);
-    cursor: pointer;
-    text-decoration: none;
-}
-
-nav ul li.button:active {
-    color: var(--main-color);
+nav ul li.button:hover {
+    background-color: var(--secondary-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(5, 118, 211, 0.3);
 }
 
 header
@@ -114,56 +116,63 @@ header
     justify-content: space-between;
     position: relative;
     overflow: hidden;
-    background-image: linear-gradient(162deg, var(--second-main-color) 55%, var(--main-color) 45%);
-    color: var(--third-main-color);
-    padding: 280px 100px;
-    color: var(--third-main-color);
+    background-color: var(--primary-blue);
+    color: var(--white);
+    padding: 100px;
 }
 
 header h1 {
     font-size: 50px;
-    color: var(--main-color);
+    color: var(--white);
+    margin-bottom: 20px;
 }
 
 header p {
-    color: var(--third-main-color);
+    color: var(--white);
     font-size: 22px;
-    margin: 50px 0px;
+    margin: 30px 0px;
+    opacity: 0.9;
 }
 
 header button {
     font-size: 20px;
-    padding: 10px 50px;
+    padding: 15px 40px;
     cursor: pointer;
-    background-color: transparent;
-    border: 4px solid var(--main-color);
+    background-color: var(--accent-orange);
+    border: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
 header button a {
     text-decoration: none;
-    color: var(--third-main-color);
+    color: var(--white);
+    font-weight: 600;
 }
 
 header button:hover {
-    background-color: var(--main-color);
-}
-
-header button:active {
-    color: black;
+    background-color: #d97706;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
 }
 
 
 header div img {
     user-select: none;
     position: absolute;
-    width: 800px;
-    right: 200px;
-    bottom: -110px;
+    width: 600px;
+    right: 100px;
+    bottom: -50px;
+    opacity: 0.9;
 }
 
 .features {
     position: relative;
-    margin: 100px;
+    margin: 80px 100px;
+    background-color: var(--white);
+    padding: 60px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 .features div {
@@ -178,12 +187,16 @@ header div img {
 }
 
 .features div div h3 {
-    font-size: 30px;
+    font-size: 28px;
+    color: var(--black);
+    margin-bottom: 15px;
 }
 
 .features div div p {
-    font-size: 20px;
-    margin-top: 30px;
+    font-size: 18px;
+    margin-top: 15px;
+    color: var(--neutral-gray);
+    line-height: 1.6;
 }
 
 .features div i {
@@ -202,39 +215,58 @@ header div img {
     content: '';
     position: absolute;
     right: 30px;
-    padding: 200px 70px;
+    width: 140px;
+    height: 140px;
     top: 120px;
     z-index: -10;
-    background-color: var(--main-color);}
+    background-color: var(--background);
+    border-radius: 50%;
+}
 
 .features .img-container::after
 {
     content: '';
     position: absolute;
-    right: -50px;
-    padding: 200px 100px;
+    right: -20px;
+    width: 100px;
+    height: 100px;
     top: 80px;
     z-index: -11;
-    background-color: var(--second-main-color);
+    background-color: var(--primary-blue);
+    border-radius: 50%;
+    opacity: 0.1;
 }
 
 .about {
-    margin: 100px;
+    margin: 80px 100px;
+    background-color: var(--background);
+    padding: 60px;
+    border-radius: 20px;
 }
 
 .about .text {
-    margin: auto 200px;
+    margin: 0 auto 40px;
+    max-width: 800px;
+    text-align: center;
+}
+
+.about .text h1 {
+    color: var(--black);
+    font-size: 36px;
+    margin-bottom: 30px;
 }
 
 .about .text p {
-    margin: 40px 0px;
+    margin: 30px 0px;
     font-size: 18px;
     line-height: 1.7;
+    color: var(--neutral-gray);
 }
 
 .about .text h3 {
-    margin: 90px 0px 60px 0px;
-    font-size: 30px;
+    margin: 50px 0px 40px 0px;
+    font-size: 28px;
+    color: var(--black);
 }
 
 .about .members {
@@ -250,6 +282,8 @@ header div img {
 
 .about .members div h1 {
     margin: 30px 0px;
+    color: var(--black);
+    font-size: 24px;
 }
 
 .about .members div i {
@@ -271,14 +305,81 @@ header div img {
 }
 
 .about .repo-container button {
-    padding: 20px 10px;
+    padding: 15px 30px;
     border: none;
-    background-color: black;
-    color: white;
+    background-color: var(--primary-blue);
+    color: var(--white);
     cursor: pointer;
-    font-size: 20px;
+    font-size: 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
 }
 
 .about .repo-container button:hover {
-    color: var(--main-color);
+    background-color: var(--secondary-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(5, 118, 211, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    nav {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    nav ul {
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+        text-align: center;
+    }
+    
+    nav ul li {
+        margin: 0;
+    }
+    
+    header {
+        padding: 60px 20px;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    header div img {
+        position: static;
+        width: 100%;
+        max-width: 400px;
+        margin-top: 30px;
+    }
+    
+    .features {
+        margin: 40px 20px;
+        padding: 40px 20px;
+    }
+    
+    .features div {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .features div div {
+        margin-left: 0;
+        margin-top: 20px;
+    }
+    
+    .about {
+        margin: 40px 20px;
+        padding: 40px 20px;
+    }
+    
+    .about .members {
+        flex-direction: column;
+        gap: 40px;
+    }
+    
+    .about .members div {
+        margin: 0;
+    }
 }

@@ -8,9 +8,3 @@ app.config['SECRET_KEY']='dsierjsdfksdofip'
 db = storage
 
 bcrypt = Bcrypt(app)
-
-
-
-
-
-from .signup import login

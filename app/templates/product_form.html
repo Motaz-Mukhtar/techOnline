@@ -486,7 +486,7 @@
                     <div class="progress-bar" id="progressBar"></div>
                 </div>
                 
-                <form id="productForm" action="{{ url_for('shop') }}" method="POST" enctype="multipart/form-data">
+                <form id="productForm" action="{{ url_for('product_form') }}" method="POST" enctype="multipart/form-data">
                     <div class="form-grid">
                         <div class="form-row">
                             <div class="form-group">
@@ -544,6 +544,46 @@
                             <div class="error-message" id="imageError" style="display: none;">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="categoryId">
+                                    <i class="fas fa-tags"></i>
+                                    Category
+                                </label>
+                                <select class="form-control" id="categoryId" name="category_id">
+                                    <option value="1">Electronics</option>
+                                    <option value="2">Computers</option>
+                                    <option value="3">Mobile Devices</option>
+                                    <option value="4">Gaming</option>
+                                    <option value="5">Accessories</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="stockQuantity">
+                                    <i class="fas fa-boxes"></i>
+                                    Stock Quantity
+                                </label>
+                                <input type="number" class="form-control" id="stockQuantity" name="stock_quantity" 
+                                       placeholder="10" min="0" value="10">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="minStockLevel">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Minimum Stock Level
+                                </label>
+                                <input type="number" class="form-control" id="minStockLevel" name="min_stock_level" 
+                                       placeholder="5" min="0" value="5">
+                            </div>
+                            
+                            <div class="form-group">
+                                <!-- Empty for spacing -->
                             </div>
                         </div>
                         
