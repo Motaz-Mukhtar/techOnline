@@ -2,11 +2,9 @@
 
 ![techOnline Logo](https://github.com/Motaz-Mukhtar/techOnline/blob/main/assets/techOnline_Logo.png)\
 
-E-commerce Online Store
-
 
 E-commerce Online Store that allow users to showcase there tech products,
-you can try it [here](http://web-01.alxweb-01.tech/home).
+you can try it [here](http://web-01.alxweb-01.tech/home) (Not available at the moment).
 
 
 ## Technologies:
@@ -14,7 +12,7 @@ you can try it [here](http://web-01.alxweb-01.tech/home).
 The technologies that we used to build this project are:
 
 
-![Web Stack](https://github.com/Motaz-Mukhtar/techOnline/blob/main/assets/2025-10-04 13-50-44.png)
+![Web Stack](https://github.com/Motaz-Mukhtar/techOnline/blob/main/assets/2025-10-04%2013-50-44.png)
 
 
 #### Why These Stack?
