@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>TechOnline | Product Details</title>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#2563eb',
+                        'secondary-blue': '#1d4ed8',
+                        'accent-orange': '#f59e0b',
+                        'neutral-gray': '#6b7280',
+                        'background': '#f8fafc'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background font-sans m-0 p-0">
+    <header class="bg-gradient-to-br from-primary-blue to-secondary-blue text-white py-4 shadow-lg">
+        <div class="max-w-6xl mx-auto px-8 flex justify-between items-center flex-wrap gap-4">
+            <a href="{{ url_for('shop') }}" class="text-white no-underline">
+                <h1 class="text-4xl font-black m-0 cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105">tech<span class="text-accent-orange">O</span>nline</h1>
+            </a>
+            <ul class="flex gap-4 list-none m-0 p-0">
+                <li><a href="{{ url_for('shop') }}" class="text-white no-underline px-4 py-2 rounded-2xl transition-all duration-300 ease-in-out font-medium hover:bg-white hover:bg-opacity-20 hover:-translate-y-0.5"><i class="fas fa-store"></i> Shop</a></li>
+                <li><a href="{{ url_for('cart') }}" class="text-white no-underline px-4 py-2 rounded-2xl transition-all duration-300 ease-in-out font-medium hover:bg-white hover:bg-opacity-20 hover:-translate-y-0.5"><i class="fas fa-shopping-cart"></i> Cart</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto my-8 px-8">
+        <div class="bg-white rounded-2xl overflow-hidden shadow-lg">
+            <div class="grid grid-cols-1 md:grid-cols-2">
+                <div class="p-6 flex items-center justify-center bg-background">
+                    <div class="w-full h-64 flex items-center justify-center bg-background">
+                        {% if product and product.product_image %}
+                        <img src="{{ product.product_image }}" alt="{{ product.product_name or 'Product' }}" class="max-h-64 object-contain">
+                        {% else %}
+                        <i class="fas fa-image text-6xl text-neutral-gray"></i>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold text-black mb-2">{{ product.product_name or 'Product Details' }}</h2>
+                    <div class="text-xl font-semibold text-primary-blue mb-4">
+                        {% if product.price %}
+                        ${{ '%.2f'|format((product.price|string)|float) }}
+                        {% else %}
+                        $0.00
+                        {% endif %}
+                    </div>
+                    <p class="text-neutral-gray leading-relaxed mb-6">{{ product.description or 'No description available.' }}</p>
+
+                    <div class="flex gap-2">
+                        <button id="addToCartBtn" class="bg-accent-orange text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out hover:bg-yellow-600 hover:-translate-y-0.5"><i class="fas fa-cart-plus"></i> Add to Cart</button>
+                        <a href="{{ url_for('shop') }}" class="bg-primary-blue text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out hover:bg-secondary-blue hover:-translate-y-0.5 no-underline"><i class="fas fa-arrow-left"></i> Back to Shop</a>
+                    </div>
+
+                    <div class="mt-8">
+                        <h3 class="text-lg font-semibold mb-2">Linked Data</h3>
+                        <ul class="list-disc pl-6 text-neutral-gray">
+                            <li>Category: <span>{{ category_name or 'N/A' }}</span></li>
+                            <li>Seller: <span>{{ (seller.first_name ~ ' ' ~ seller.last_name)|trim if seller else 'N/A' }}</span></li>
+                            <li>Stock: <span>{{ product.stock_quantity or 'N/A' }}</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="mt-8">
+                        <h3 class="text-lg font-semibold mb-4">Reviews</h3>
+                        {% if reviews and reviews|length > 0 %}
+                            <div class="space-y-4">
+                                {% for r in reviews %}
+                                    <div class="border rounded-lg p-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <div class="font-semibold">{{ r.customer_name or 'Anonymous' }}</div>
+                                            <div class="text-yellow-500">
+                                                {% for i in range(1, 6) %}
+                                                    {% if i <= (r.rate|round(0, 'floor')) %}
+                                                        <i class="fas fa-star"></i>
+                                                    {% else %}
+                                                        <i class="far fa-star"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        {% if r.title %}
+                                            <div class="text-sm text-neutral-gray mb-1">{{ r.title }}</div>
+                                        {% endif %}
+                                        <div class="text-neutral-gray">{{ r.text }}</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div id="reviews" class="text-neutral-gray">No reviews yet.</div>
+                        {% endif %}
+
+                        <div class="mt-6">
+                            {% if has_reviewed %}
+                                <div class="bg-background border rounded-lg p-4 text-neutral-gray">
+                                    You have already submitted a review for this product.
+                                </div>
+                            {% else %}
+                                <form action="{{ url_for('create_product_review', product_id=product.id) }}" method="POST" class="bg-background border rounded-lg p-4 space-y-4">
+                                    <div>
+                                        <label for="rating" class="block font-semibold mb-1">Rating</label>
+                                        <select name="rating" id="rating" class="form-control" required>
+                                            <option value="" disabled selected>Select rating</option>
+                                            <option value="5">★★★★★ (5)</option>
+                                            <option value="4">★★★★☆ (4)</option>
+                                            <option value="3">★★★☆☆ (3)</option>
+                                            <option value="2">★★☆☆☆ (2)</option>
+                                            <option value="1">★☆☆☆☆ (1)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="title" class="block font-semibold mb-1">Title (optional)</label>
+                                        <input type="text" id="title" name="title" class="form-control" placeholder="Great product!" />
+                                    </div>
+                                    <div>
+                                        <label for="text" class="block font-semibold mb-1">Your Review</label>
+                                        <textarea id="text" name="text" class="form-control" rows="4" placeholder="Share your experience" required></textarea>
+                                    </div>
+                                    <button type="submit" class="bg-accent-orange text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out hover:bg-yellow-600 hover:-translate-y-0.5">
+                                        <i class="fas fa-paper-plane"></i> Submit Review
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Prepare product data from server-rendered values for cart operations
+        const product = {
+            id: "{{ product.id }}",
+            name: "{{ product.product_name or '' }}",
+            price: Number("{{ product.price or 0 }}") || 0,
+            image: "{{ product.product_image or '' }}"
+        };
+
+        async function addToCartServer(prod) {
+            try {
+                const res = await fetch('/cart/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: prod.id, quantity: 1 })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to add to cart');
+                alert('Added to cart');
+            } catch (e) {
+                console.error('Failed to add to cart:', e);
+                alert('Could not add to cart.');
+            }
+        }
+
+        document.getElementById('addToCartBtn').addEventListener('click', () => addToCartServer(product));
+    </script>
+</body>
+</html>

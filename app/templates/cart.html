@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>TechOnline | Cart</title>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#2563eb',
+                        'secondary-blue': '#1d4ed8',
+                        'accent-orange': '#f59e0b',
+                        'neutral-gray': '#6b7280',
+                        'background': '#f8fafc'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background font-sans m-0 p-0">
+    <header class="bg-gradient-to-br from-primary-blue to-secondary-blue text-white py-4 shadow-lg">
+        <div class="max-w-6xl mx-auto px-8 flex justify-between items-center flex-wrap gap-4">
+            <a href="{{ url_for('shop') }}" class="text-white no-underline">
+                <h1 class="text-4xl font-black m-0 cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105">tech<span class="text-accent-orange">O</span>nline</h1>
+            </a>
+            <div class="relative ml-auto">
+                <button id="cartDropdownBtn" type="button" class="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-2xl font-medium transition-all duration-300 ease-in-out">
+                    <i class="fas fa-bars"></i>
+                    Menu
+                    <i class="fas fa-chevron-down text-sm"></i>
+                </button>
+                <div id="cartDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-52 bg-white text-black rounded-xl shadow-xl overflow-hidden z-50">
+                    <a href="{{ url_for('customer_profile') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-user mr-2"></i> Profile</a>
+                    <a href="{{ url_for('cart') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-shopping-cart mr-2"></i> Cart</a>
+                    <a href="{{ url_for('product_form') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-plus mr-2"></i> Add Product</a>
+                    <a href="{{ url_for('logout') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto my-8 px-8">
+        <div class="text-center mb-8 text-black">
+            <h2>Your Cart</h2>
+            <p>Manage quantities, remove items, and review your total.</p>
+        </div>
+
+        <div id="cartContainer" class="bg-white rounded-2xl overflow-hidden shadow-lg p-6">
+            {% if items and items|length > 0 %}
+                {% for item in items %}
+                <div class="flex items-center gap-4 py-4 border-b">
+                    <div class="w-16 h-16 bg-background flex items-center justify-center rounded">
+                        {% if item.image %}
+                        <img src="{{ item.image }}" alt="{{ item.name }}" class="w-16 h-16 object-cover rounded">
+                        {% else %}
+                        <i class="fas fa-image text-2xl text-neutral-gray"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-semibold text-black">{{ item.name }}</div>
+                        <div class="text-neutral-gray">${{ '%.2f'|format(item.price|float) }}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="px-3 py-1 bg-background rounded" onclick="changeQty('{{ item.product_id }}', -1)"><i class="fas fa-minus"></i></button>
+                        <span id="qty-{{ item.product_id }}" class="px-3">{{ item.quantity }}</span>
+                        <button class="px-3 py-1 bg-background rounded" onclick="changeQty('{{ item.product_id }}', 1)"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div class="w-24 text-right font-semibold text-black">${{ '%.2f'|format(item.subtotal|float) }}</div>
+                    <button class="ml-4 text-red-600" onclick="removeItem('{{ item.product_id }}')"><i class="fas fa-trash"></i></button>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-12 text-neutral-gray">
+                    <i class="fas fa-box-open text-6xl mb-4 text-neutral-gray"></i>
+                    <h3>Your cart is empty</h3>
+                    <p>Add products from the shop page.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mt-6 flex items-center justify-between">
+            <div class="text-xl font-semibold">
+                Total: <span id="cartTotal" class="text-primary-blue">${{ '%.2f'|format((total or 0.0)|float) }}</span>
+            </div>
+            <div class="flex gap-2">
+                <a href="{{ url_for('shop') }}" class="bg-secondary-blue text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out hover:bg-primary-blue hover:-translate-y-0.5 no-underline"><i class="fas fa-arrow-left"></i> Continue Shopping</a>
+                <button id="checkoutBtn" class="bg-accent-orange text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out hover:bg-yellow-600 hover:-translate-y-0.5"><i class="fas fa-cash-register"></i> Checkout</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Cart page dropdown toggle
+        (function() {
+            const btn = document.getElementById('cartDropdownBtn');
+            const menu = document.getElementById('cartDropdownMenu');
+            if (btn && menu) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    menu.classList.toggle('hidden');
+                });
+                document.addEventListener('click', function(e) {
+                    if (!menu.contains(e.target) && !btn.contains(e.target)) {
+                        menu.classList.add('hidden');
+                    }
+                });
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        menu.classList.add('hidden');
+                    }
+                });
+            }
+        })();
+
+        async function changeQty(productId, delta) {
+            try {
+                const qtyEl = document.getElementById(`qty-${productId}`);
+                const currentQty = parseInt(qtyEl.textContent || '1', 10);
+                const newQty = Math.max(1, currentQty + delta);
+                const res = await fetch('/cart/update_item', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: productId, quantity: newQty })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to update');
+                // Simple approach: reload to reflect server state
+                window.location.reload();
+            } catch (e) {
+                alert('Failed to update quantity');
+                console.error(e);
+            }
+        }
+
+        async function removeItem(productId) {
+            try {
+                const res = await fetch('/cart/remove_item', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: productId })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to remove');
+                window.location.reload();
+            } catch (e) {
+                alert('Failed to remove item');
+                console.error(e);
+            }
+        }
+
+        document.getElementById('checkoutBtn').addEventListener('click', () => {
+            alert('Checkout flow is not integrated yet.');
+        });
+    </script>
+</body>
+</html>

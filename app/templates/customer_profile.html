@@ -87,7 +87,7 @@
         
         .main-container {
             max-width: 1200px;
-            margin: -3rem auto 0;
+            margin: 0 auto 0; /* remove negative overlap since header is gone */
             padding: 0 2rem 2rem;
             position: relative;
             z-index: 2;
@@ -477,21 +477,56 @@
         .notification.error {
             background: var(--error-red);
         }
+        /* Simplify profile page: remove collapsible edit UI */
+        .edit-form { display: none !important; }
+        #editBtn, #cancelBtn { display: none !important; }
+        /* Align header look with /shop: hide page title and extra actions */
+        .profile-title { display: none !important; }
+        .profile-actions { display: none !important; }
+        /* Top bar back button */
+        .top-bar {
+            padding: 1rem 2rem;
+            position: sticky; /* keep visible on small screens */
+            top: 0;
+            z-index: 1000;
+            background: var(--background);
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--background);
+            color: var(--black);
+            border: 2px solid var(--primary-blue);
+            border-radius: 10px;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .back-btn:hover {
+            background: var(--primary-blue);
+            color: var(--white);
+            transform: translateY(-1px);
+        }
+        /* Ensure visibility on small screens */
+        @media (max-width: 768px) {
+            .top-bar {
+                padding: 0.75rem 1rem;
+            }
+            .back-btn {
+                font-size: 0.95rem;
+                padding: 0.5rem 0.75rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="profile-header">
-        <div class="header-content">
-            <nav class="profile-nav">
-                <a href="{{ url_for('shop') }}" class="logo">tech<span>O</span>nline</a>
-                <div class="nav-links">
-                    <a href="{{ url_for('shop') }}"><i class="fas fa-store"></i> Shop</a>
-                    <a href="{{ url_for('product_form') }}"><i class="fas fa-plus"></i> Add Product</a>
-                    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                </div>
-            </nav>
-            <h1 class="profile-title">My Profile</h1>
-        </div>
+    <div class="top-bar">
+        <button class="back-btn" onclick="window.history.back()">
+            <i class="fas fa-arrow-left"></i> Previous Page
+        </button>
     </div>
     
     <div class="main-container">
@@ -579,7 +614,7 @@
                     <img src="{{ product.product_image }}" alt="{{ product.product_name }}" class="product-image">
                     <div class="product-info">
                         <h3 class="product-name">{{ product.product_name }}</h3>
-                        <p class="product-price">${{ "%.2f"|format(product.product_price|float) }}</p>
+                        <p class="product-price">${{ "%.2f"|format(product.price|float) }}</p>
                         <div class="product-actions">
                             <button class="btn btn-primary btn-sm" onclick="editProduct({{ product.id }})">
                                 <i class="fas fa-edit"></i> Edit
@@ -669,9 +704,24 @@
             });
         });
         
+        // Dropdown toggle for profile header
+        (function() {
+            const btn = document.getElementById('profileDropdownBtn');
+            const menu = document.getElementById('profileDropdownMenu');
+            if (btn && menu) {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    menu.classList.toggle('hidden');
+                });
+                document.addEventListener('click', () => {
+                    menu.classList.add('hidden');
+                });
+            }
+        })();
+
         function editProduct(productId) {
-            // Redirect to product edit page
-            window.location.href = `/product/edit/${productId}`;
+            // Redirect to product edit page (placeholder)
+            window.location.href = `/shop/product_form?edit=${productId}`;
         }
         
         function deleteProduct(productId) {

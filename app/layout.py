@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 from modules.Customer.customer import Customer
+from modules.Category.category import Category
+from modules.Review.review import Review
 from modules.Products.product import Product
+from modules.Cart.cart import Cart
+from modules.Cart.cart_item import CartItem
 from modules.utils.file_handler import save_uploaded_file
 from flask import render_template, request, flash, redirect, url_for
+from flask import jsonify
 from flask_login import login_required
 from app import app
 from app.auth import current_user
@@ -74,6 +79,9 @@ def shop():
                 if response.status_code == 200:
                     api_data = response.json()
                     products_data = api_data.get('data', [])
+                    # Handle both flat list and nested { products: [...] } structures
+                    if isinstance(products_data, dict):
+                        products_data = products_data.get('products', [])
                     
                     # Convert API response to Product-like objects for template compatibility
                     matching_products = []
@@ -103,6 +111,9 @@ def shop():
                 if response.status_code == 200:
                     api_data = response.json()
                     products_data = api_data.get('data', [])
+                    # Handle both flat list and nested { products: [...] } structures
+                    if isinstance(products_data, dict):
+                        products_data = products_data.get('products', [])
                     
                     # Convert API response to Product-like objects
                     products_list = []
@@ -130,6 +141,9 @@ def shop():
         if response.status_code == 200:
             api_data = response.json()
             products_data = api_data.get('data', [])
+            # Handle both flat list and nested { products: [...] } structures
+            if isinstance(products_data, dict):
+                products_data = products_data.get('products', [])
             
             # Convert API response to Product-like objects
             products_list = []
@@ -173,6 +187,13 @@ def product_form():
         GET: Rendered product form template
         POST: Redirect to shop page on success, or form with errors on failure
     """
+    # Fetch active categories for the form (used by GET and on error cases)
+    try:
+        all_categories = list(storage.all(Category).values())
+        categories = [c for c in all_categories if getattr(c, 'is_active', 'True') == 'True']
+    except Exception:
+        categories = []
+
     if request.method == 'POST':
         try:
             # Extract form data
@@ -180,24 +201,33 @@ def product_form():
             price = request.form.get('price', '').strip()
             description = request.form.get('description', '').strip()
             customer_id = request.form.get('customer_id')
-            category_id = request.form.get('category_id', '1')  # Default category
+            category_id = request.form.get('category_id', '').strip()
             stock_quantity = request.form.get('stock_quantity', '10')  # Default stock
             min_stock_level = request.form.get('min_stock_level', '5')  # Default min stock
             
             # Validate required fields
             if not all([product_name, price, description, customer_id]):
                 flash('All fields are required!', 'error')
-                return render_template('product_form.html', user=current_user.to_dict())
+                return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
+
+            # Validate category selection
+            if not category_id:
+                flash('Please select a category.', 'error')
+                return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
+            # Ensure the category exists
+            if not storage.get(Category, category_id):
+                flash('Selected category not found.', 'error')
+                return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
             
             # Validate price is numeric
             try:
                 price_float = float(price)
                 if price_float <= 0:
                     flash('Price must be a positive number!', 'error')
-                    return render_template('product_form.html', user=current_user.to_dict())
+                    return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
             except ValueError:
                 flash('Price must be a valid number!', 'error')
-                return render_template('product_form.html', user=current_user.to_dict())
+                return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
             
             # Prepare form data for API
             form_data = {
@@ -217,15 +247,9 @@ def product_form():
                 if file and file.filename:
                     files['product_image'] = (file.filename, file.stream, file.content_type)
             
-            # Get admin API key for API authentication
-            api_key = get_admin_api_key()
-            if not api_key:
-                flash('Authentication failed. Please try again.', 'error')
-                return redirect(url_for('product_form'))
-            
-            # Create product via API
+            # Create product via API as customer (no admin key required)
             api_url = 'http://127.0.0.1:5001/api/v1/products'
-            headers = {'Authorization': f'API-Key {api_key}'}
+            headers = {}
             
             if files:
                 # Send multipart form data with file
@@ -253,16 +277,46 @@ def product_form():
                 except:
                     flash(f'Error creating product: HTTP {response.status_code}', 'error')
                 
-                return render_template('product_form.html', user=current_user.to_dict())
+                return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
             
         except requests.exceptions.RequestException as e:
             flash(f'Error connecting to API: {str(e)}', 'error')
-            return render_template('product_form.html', user=current_user.to_dict())
+            # Fallback: create product directly in the local database
+            try:
+                # Create and save product locally
+                from modules.Products.product import Product
+                local_product = Product(
+                    product_name=product_name,
+                    description=description,
+                    price=price_float,
+                    customer_id=customer_id,
+                    category_id=category_id,
+                    stock_quantity=int(stock_quantity) if str(stock_quantity).isdigit() else 0,
+                    min_stock_level=int(min_stock_level) if str(min_stock_level).isdigit() else 5
+                )
+                local_product.save()
+
+                # Handle image upload locally if present
+                if 'product_image' in request.files:
+                    file = request.files['product_image']
+                    if file and file.filename:
+                        result = save_uploaded_file(file, 'product', local_product.id)
+                        if result.get('success'):
+                            local_product.product_image = result.get('url')
+                            local_product.product_image_filename = result.get('filename')
+                            local_product.save()
+
+                flash(f'Product "{product_name}" created locally (API unavailable).', 'success')
+                return redirect(url_for('shop'))
+            except Exception as ex:
+                flash(f'Error creating product locally: {str(ex)}', 'error')
+                return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
         except Exception as e:
             flash(f'Error creating product: {str(e)}', 'error')
-            return render_template('product_form.html', user=current_user.to_dict())
-    
-    return render_template('product_form.html', user=current_user.to_dict())
+            return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
+
+    # GET request: render form with categories
+    return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
 
 
 
@@ -288,4 +342,419 @@ def tdddest():
 
 
 # Old Base64 image serving endpoint removed - now using direct file serving
+
+@app.route('/product/<product_id>', methods=['GET'], strict_slashes=False)
+@login_required
+def product_details(product_id):
+    """
+    Render product details page.
+    """
+    try:
+        # Try fetching product from API
+        api_url = f'http://127.0.0.1:5000/api/v1/products/{product_id}'
+        response = requests.get(api_url, timeout=10)
+
+        product_data = None
+        if response.status_code == 200:
+            api_json = response.json()
+            # API responses use a success envelope with 'data'
+            product_data = api_json.get('data') if isinstance(api_json, dict) else None
+        else:
+            # Fallback to storage when API returns non-200
+            product_obj = storage.get(Product, product_id)
+            if product_obj:
+                product_data = product_obj.to_dict()
+
+        if not product_data:
+            flash('Product not found', 'error')
+            return redirect(url_for('shop'))
+
+        # Resolve seller information via storage to avoid API permission issues
+        seller_info = {'first_name': '', 'last_name': ''}
+        try:
+            customer_id = product_data.get('customer_id') if isinstance(product_data, dict) else None
+            if customer_id:
+                seller = storage.get(Customer, customer_id)
+                if seller:
+                    seller_info = {
+                        'first_name': getattr(seller, 'first_name', ''),
+                        'last_name': getattr(seller, 'last_name', '')
+                    }
+        except Exception:
+            # If seller lookup fails, continue without blocking the page
+            pass
+
+        # Resolve category name
+        category_name = None
+        try:
+            cat_id = product_data.get('category_id') if isinstance(product_data, dict) else None
+            if cat_id:
+                cat = storage.get(Category, cat_id)
+                if cat:
+                    category_name = getattr(cat, 'name', None)
+        except Exception:
+            pass
+
+        # Fetch approved reviews
+        reviews = []
+        try:
+            all_reviews = storage.all(Review)
+            product_reviews = [
+                r for r in all_reviews.values()
+                if r.product_id == product_id and r.is_approved == 1
+            ]
+            product_reviews.sort(key=lambda x: x.created_at, reverse=True)
+            for r in product_reviews:
+                cust = storage.get(Customer, r.customer_id)
+                reviews.append({
+                    'id': r.id,
+                    'title': r.title,
+                    'text': r.text,
+                    'rate': r.rate,
+                    'customer_name': f"{cust.first_name} {cust.last_name}" if cust else None,
+                    'created_at': r.created_at
+                })
+        except Exception:
+            pass
+
+        # Determine if current user has already reviewed
+        has_reviewed = False
+        try:
+            prod_obj = storage.get(Product, product_id)
+            if prod_obj and current_user:
+                has_reviewed = prod_obj.has_customer_reviewed(current_user.id)
+        except Exception:
+            pass
+
+        return render_template('product_details.html', product=product_data, seller=seller_info, category_name=category_name, reviews=reviews, has_reviewed=has_reviewed)
+
+    except requests.exceptions.RequestException:
+        # Network/API error: use storage fallback
+        product_obj = storage.get(Product, product_id)
+        if product_obj:
+            product_data = product_obj.to_dict()
+            seller_info = {'first_name': '', 'last_name': ''}
+            try:
+                seller = storage.get(Customer, product_data.get('customer_id'))
+                if seller:
+                    seller_info = {
+                        'first_name': getattr(seller, 'first_name', ''),
+                        'last_name': getattr(seller, 'last_name', '')
+                    }
+            except Exception:
+                pass
+            # Resolve category name
+            category_name = None
+            try:
+                cat_id = product_data.get('category_id') if isinstance(product_data, dict) else None
+                if cat_id:
+                    cat = storage.get(Category, cat_id)
+                    if cat:
+                        category_name = getattr(cat, 'name', None)
+            except Exception:
+                pass
+
+            # Fetch approved reviews
+            reviews = []
+            try:
+                all_reviews = storage.all(Review)
+                product_reviews = [
+                    r for r in all_reviews.values()
+                    if r.product_id == product_id and r.is_approved == 1
+                ]
+                product_reviews.sort(key=lambda x: x.created_at, reverse=True)
+                for r in product_reviews:
+                    cust = storage.get(Customer, r.customer_id)
+                    reviews.append({
+                        'id': r.id,
+                        'title': r.title,
+                        'text': r.text,
+                        'rate': r.rate,
+                        'customer_name': f"{cust.first_name} {cust.last_name}" if cust else None,
+                        'created_at': r.created_at
+                    })
+            except Exception:
+                pass
+
+            # Determine if current user has already reviewed
+            has_reviewed = False
+            try:
+                if current_user and product_obj:
+                    has_reviewed = product_obj.has_customer_reviewed(current_user.id)
+            except Exception:
+                pass
+
+            return render_template('product_details.html', product=product_data, seller=seller_info, category_name=category_name, reviews=reviews, has_reviewed=has_reviewed)
+        flash('Error fetching product details', 'error')
+        return redirect(url_for('shop'))
+    except Exception as e:
+        flash(f'Unexpected error: {str(e)}', 'error')
+        return redirect(url_for('shop'))
+
+
+@app.route('/product/<product_id>/reviews', methods=['GET'], strict_slashes=False)
+@login_required
+def get_product_reviews(product_id):
+    try:
+        prod = storage.get(Product, product_id)
+        if not prod:
+            return jsonify({'error': 'Product not found'}), 404
+
+        all_reviews = storage.all(Review)
+        product_reviews = [
+            r for r in all_reviews.values()
+            if r.product_id == product_id and r.is_approved == 1
+        ]
+        product_reviews.sort(key=lambda x: x.created_at, reverse=True)
+
+        result = []
+        for r in product_reviews:
+            cust = storage.get(Customer, r.customer_id)
+            result.append({
+                'id': r.id,
+                'title': r.title,
+                'text': r.text,
+                'rate': r.rate,
+                'customer_name': f"{cust.first_name} {cust.last_name}" if cust else None,
+                'created_at': r.created_at.isoformat()
+            })
+
+        return jsonify({'reviews': result, 'count': len(result)}), 200
+    except Exception as e:
+        return jsonify({'error': f'Failed to get reviews: {str(e)}'}), 500
+
+
+@app.route('/product/<product_id>/reviews', methods=['POST'], strict_slashes=False)
+@login_required
+def create_product_review(product_id):
+    try:
+        prod = storage.get(Product, product_id)
+        if not prod:
+            flash('Product not found', 'error')
+            return redirect(url_for('product_details', product_id=product_id))
+
+        if prod.has_customer_reviewed(current_user.id):
+            flash('You already reviewed this product.', 'error')
+            return redirect(url_for('product_details', product_id=product_id))
+
+        rating = request.form.get('rating')
+        title = request.form.get('title')
+        text = request.form.get('text')
+
+        if not text or not rating:
+            flash('Rating and review text are required.', 'error')
+            return redirect(url_for('product_details', product_id=product_id))
+
+        try:
+            rating_float = float(rating)
+            if rating_float < 1 or rating_float > 5:
+                flash('Rating must be between 1 and 5.', 'error')
+                return redirect(url_for('product_details', product_id=product_id))
+        except ValueError:
+            flash('Invalid rating value.', 'error')
+            return redirect(url_for('product_details', product_id=product_id))
+
+        review = Review(
+            product_id=product_id,
+            customer_id=current_user.id,
+            text=text,
+            rate=rating_float,
+            title=title
+        )
+        review.save()
+
+        flash('Review submitted successfully!', 'success')
+        return redirect(url_for('product_details', product_id=product_id))
+    except Exception as e:
+        flash(f'Failed to submit review: {str(e)}', 'error')
+        return redirect(url_for('product_details', product_id=product_id))
+
+@app.route('/cart', methods=['GET'], strict_slashes=False)
+@login_required
+def cart():
+    """
+    Cart page rendered with server-side data from database.
+    """
+    try:
+        # Find current user's cart
+        user_id = getattr(current_user, 'id', None)
+        cart_obj = None
+        if user_id:
+            for c in storage.all(Cart).values():
+                if c.customer_id == user_id:
+                    cart_obj = c
+                    break
+
+        items = []
+        total = 0.0
+        if cart_obj:
+            # Ensure totals are up to date
+            try:
+                cart_obj.calculate_total_price()
+            except Exception:
+                pass
+
+            for ci in cart_obj.cart_items:
+                prod = storage.get(Product, ci.product_id)
+                items.append({
+                    'product_id': ci.product_id,
+                    'name': getattr(prod, 'product_name', 'Product'),
+                    'price': getattr(prod, 'price', ci.unit_price),
+                    'image': getattr(prod, 'product_image', None),
+                    'quantity': ci.quantity,
+                    'subtotal': ci.subtotal
+                })
+            total = cart_obj.total_price
+
+        return render_template('cart.html', cart=cart_obj, items=items, total=total)
+    except Exception as e:
+        flash(f'Failed to load cart: {str(e)}', 'error')
+        return render_template('cart.html', cart=None, items=[], total=0.0)
+
+
+@app.route('/cart/add', methods=['POST'], strict_slashes=False)
+@login_required
+def add_to_cart():
+    """Add a product to the current user's cart in the database."""
+    try:
+        data = request.get_json(silent=True) or request.form
+        product_id = data.get('product_id')
+        quantity = int(str(data.get('quantity', 1)))
+
+        if not product_id:
+            return jsonify({'error': 'product_id is required'}), 400
+
+        # Validate product exists
+        prod = storage.get(Product, product_id)
+        if not prod:
+            return jsonify({'error': 'Product not found'}), 404
+
+        user_id = getattr(current_user, 'id', None)
+        if not user_id:
+            return jsonify({'error': 'Not authenticated'}), 401
+
+        # Find or create cart for user
+        cart_obj = None
+        for c in storage.all(Cart).values():
+            if c.customer_id == user_id:
+                cart_obj = c
+                break
+        if not cart_obj:
+            cart_obj = Cart(customer_id=user_id)
+            cart_obj.save()
+
+        # Add product to cart
+        try:
+            cart_item = cart_obj.add_product(product_id, quantity)
+        except ValueError as ve:
+            return jsonify({'error': str(ve)}), 400
+
+        # Persist changes
+        try:
+            cart_item.save()
+        except Exception:
+            pass
+        cart_obj.save()
+
+        return jsonify({
+            'message': 'Added to cart',
+            'cart_id': cart_obj.id,
+            'item': {
+                'product_id': cart_item.product_id,
+                'quantity': cart_item.quantity,
+                'unit_price': cart_item.unit_price,
+                'subtotal': cart_item.subtotal
+            },
+            'total': cart_obj.total_price
+        }), 200
+    except Exception as e:
+        return jsonify({'error': f'Failed to add to cart: {str(e)}'}), 500
+
+
+@app.route('/cart/update_item', methods=['POST'], strict_slashes=False)
+@login_required
+def update_cart_item():
+    """Update quantity for a product in the cart."""
+    try:
+        data = request.get_json(silent=True) or request.form
+        product_id = data.get('product_id')
+        new_quantity = int(str(data.get('quantity', 1)))
+
+        if not product_id:
+            return jsonify({'error': 'product_id is required'}), 400
+        if new_quantity <= 0:
+            return jsonify({'error': 'quantity must be > 0'}), 400
+
+        user_id = getattr(current_user, 'id', None)
+        cart_obj = None
+        for c in storage.all(Cart).values():
+            if c.customer_id == user_id:
+                cart_obj = c
+                break
+        if not cart_obj:
+            return jsonify({'error': 'Cart not found'}), 404
+
+        # Find item
+        target_item = None
+        for ci in cart_obj.cart_items:
+            if ci.product_id == product_id:
+                target_item = ci
+                break
+        if not target_item:
+            return jsonify({'error': 'Item not found in cart'}), 404
+
+        # Update
+        try:
+            target_item.update_quantity(new_quantity)
+        except ValueError as ve:
+            return jsonify({'error': str(ve)}), 400
+        try:
+            target_item.save()
+        except Exception:
+            pass
+
+        cart_obj.calculate_total_price()
+        cart_obj.save()
+
+        return jsonify({
+            'message': 'Quantity updated',
+            'item': {
+                'product_id': target_item.product_id,
+                'quantity': target_item.quantity,
+                'subtotal': target_item.subtotal
+            },
+            'total': cart_obj.total_price
+        }), 200
+    except Exception as e:
+        return jsonify({'error': f'Failed to update item: {str(e)}'}), 500
+
+
+@app.route('/cart/remove_item', methods=['POST'], strict_slashes=False)
+@login_required
+def remove_cart_item():
+    """Remove a product from the cart."""
+    try:
+        data = request.get_json(silent=True) or request.form
+        product_id = data.get('product_id')
+        if not product_id:
+            return jsonify({'error': 'product_id is required'}), 400
+
+        user_id = getattr(current_user, 'id', None)
+        cart_obj = None
+        for c in storage.all(Cart).values():
+            if c.customer_id == user_id:
+                cart_obj = c
+                break
+        if not cart_obj:
+            return jsonify({'error': 'Cart not found'}), 404
+
+        # Remove
+        removed = cart_obj.remove_product(product_id)
+        if not removed:
+            return jsonify({'error': 'Item not found in cart'}), 404
+
+        cart_obj.save()
+        return jsonify({'message': 'Item removed', 'total': cart_obj.total_price}), 200
+    except Exception as e:
+        return jsonify({'error': f'Failed to remove item: {str(e)}'}), 500
 

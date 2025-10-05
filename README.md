@@ -14,7 +14,7 @@ you can try it [here](http://web-01.alxweb-01.tech/home).
 The technologies that we used to build this project are:
 
 
-![Web Stack](https://github.com/Motaz-Mukhtar/techOnline/blob/main/assets/2023-4-13(0).jpg)
+![Web Stack](https://github.com/Motaz-Mukhtar/techOnline/blob/main/assets/2025-10-04 13-50-44.png)
 
 
 #### Why These Stack?

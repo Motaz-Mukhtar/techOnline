@@ -6,8 +6,40 @@
     <title>TechOnline | Add Product</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#2563eb',
+                        'secondary-blue': '#1d4ed8',
+                        'accent-orange': '#f59e0b',
+                        'neutral-gray': '#6b7280',
+                        'background': '#f8fafc',
+                        'white': '#ffffff',
+                        'black': '#111827',
+                        'success-green': '#10b981',
+                        'error-red': '#ef4444'
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --primary-blue: #2563eb;
+            --secondary-blue: #1d4ed8;
+            --accent-orange: #f59e0b;
+            --neutral-gray: #6b7280;
+            --background: #f8fafc;
+            --white: #ffffff;
+            --black: #111827;
+            --success-green: #10b981;
+            --error-red: #ef4444;
+        }
+
         body {
             background: var(--background);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -17,11 +49,25 @@
         }
         
         .form-header {
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            background: var(--main-color) !important; /* ensure main color and override global */
             color: var(--white);
             padding: 2rem 0;
             position: relative;
-            overflow: hidden;
+            overflow: visible; /* allow dropdown to render outside header height */
+        }
+
+        /* Override global nav styles within the header */
+        .form-header .form-nav {
+            background: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            position: relative !important;
+            top: auto !important;
+        }
+
+        .form-header .form-nav .logo,
+        .form-header .form-nav a {
+            color: var(--white) !important;
         }
         
         .form-header::before {
@@ -40,7 +86,7 @@
             margin: 0 auto;
             padding: 0 2rem;
             position: relative;
-            z-index: 1;
+            z-index: 1000; /* ensure dropdown renders above form card */
         }
         
         .form-nav {
@@ -77,6 +123,16 @@
         .nav-links a:hover {
             color: var(--accent-orange);
         }
+
+        /* Dropdown menu styling overrides */
+        #productFormDropdownMenu {
+            z-index: 2000 !important; /* above other containers */
+        }
+
+        #productFormDropdownMenu a,
+        #productFormDropdownMenu a i {
+            color: #000 !important; /* make text and icons black */
+        }
         
         .form-title {
             text-align: center;
@@ -94,7 +150,7 @@
         
         .main-container {
             max-width: 800px;
-            margin: -3rem auto 0;
+            margin: 0 auto 0; /* prevent overlap so header content stays visible */
             padding: 0 2rem 2rem;
             position: relative;
             z-index: 2;
@@ -461,6 +517,7 @@
         .notification.error {
             background: var(--error-red);
         }
+
     </style>
 </head>
 <body>
@@ -468,10 +525,18 @@
         <div class="header-content">
             <nav class="form-nav">
                 <a href="{{ url_for('shop') }}" class="logo">tech<span>O</span>nline</a>
-                <div class="nav-links">
-                    <a href="{{ url_for('shop') }}"><i class="fas fa-store"></i> Shop</a>
-                    <a href="{{ url_for('customer_profile') }}"><i class="fas fa-user"></i> Profile</a>
-                    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                <div class="relative">
+                    <button id="productFormDropdownBtn" type="button" class="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-2xl font-medium transition-all duration-300 ease-in-out">
+                        <i class="fas fa-bars text-black"></i>
+                        <span class="text-black">Menu</span>
+                        <i class="fas fa-chevron-down text-sm"></i>
+                    </button>
+                    <div id="productFormDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-52 bg-white text-black rounded-xl shadow-xl overflow-hidden z-50">
+                        <a href="{{ url_for('customer_profile') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-user mr-2"></i> Profile</a>
+                        <a href="{{ url_for('cart') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-shopping-cart mr-2"></i> Cart</a>
+                        <a href="{{ url_for('product_form') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-plus mr-2"></i> Add Product</a>
+                        <a href="{{ url_for('logout') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+                    </div>
                 </div>
             </nav>
             <h1 class="form-title">Add New Product</h1>
@@ -553,12 +618,15 @@
                                     <i class="fas fa-tags"></i>
                                     Category
                                 </label>
-                                <select class="form-control" id="categoryId" name="category_id">
-                                    <option value="1">Electronics</option>
-                                    <option value="2">Computers</option>
-                                    <option value="3">Mobile Devices</option>
-                                    <option value="4">Gaming</option>
-                                    <option value="5">Accessories</option>
+                                <select class="form-control" id="categoryId" name="category_id" required>
+                                    {% if categories and categories|length > 0 %}
+                                        <option value="" disabled selected>Select a category</option>
+                                        {% for category in categories %}
+                                            <option value="{{ category.id }}">{{ category.name }}</option>
+                                        {% endfor %}
+                                    {% else %}
+                                        <option value="" disabled>No categories available</option>
+                                    {% endif %}
                                 </select>
                             </div>
                             
@@ -821,7 +889,7 @@
                     setTimeout(() => {
                         showNotification('Product added successfully!', 'success');
                         // In real implementation, submit the form
-                        // form.submit();
+                        form.submit();
                         
                         // Reset form for demo
                         setTimeout(() => {
@@ -877,7 +945,31 @@
                     }, 300);
                 }, 3000);
             }
+
+            // Header dropdown toggle
+            const dropdownBtn = document.getElementById('productFormDropdownBtn');
+            const dropdownMenu = document.getElementById('productFormDropdownMenu');
+            if (dropdownBtn && dropdownMenu) {
+                dropdownBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle('hidden');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!dropdownMenu.contains(e.target) && !dropdownBtn.contains(e.target)) {
+                        dropdownMenu.classList.add('hidden');
+                    }
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        dropdownMenu.classList.add('hidden');
+                    }
+                });
+            }
         });
     </script>
+    
 </body>
 </html>

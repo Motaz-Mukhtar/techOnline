@@ -43,9 +43,61 @@
             background: #ef4444;
             color: white;
         }
+
+        /* Global page loader overlay with three dots animation */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000; /* above header and dropdown */
+            transition: opacity 0.2s ease;
+        }
+
+        .loader-dots {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .loader-dots .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #111827; /* neutral black */
+            animation: dotPulse 1s ease-in-out infinite;
+        }
+
+        .loader-dots .dot:nth-child(2) { animation-delay: 0.2s; }
+        .loader-dots .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dotPulse {
+            0%, 80%, 100% {
+                transform: scale(0.6);
+                opacity: 0.4;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body class="bg-background font-sans m-0 p-0">
+    <!-- Global Page loader overlay -->
+    <div id="pageLoader" class="loader-overlay" aria-hidden="true">
+        <div class="loader-dots">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+    </div>
     {% block content %}
     <header class="bg-gradient-to-br from-primary-blue to-secondary-blue text-white py-4 shadow-lg">
         <div class="max-w-6xl mx-auto px-8 flex justify-between items-center flex-wrap gap-4">
@@ -62,11 +114,19 @@
                 </button>
             </form>
             
-            <ul class="flex gap-4 list-none m-0 p-0">
-                <li><a href="{{ url_for('customer_profile') }}" class="text-white no-underline px-4 py-2 rounded-2xl transition-all duration-300 ease-in-out font-medium hover:bg-white hover:bg-opacity-20 hover:-translate-y-0.5"><i class="fas fa-user"></i> Profile</a></li>
-                <li><a href="{{ url_for('product_form') }}" class="text-white no-underline px-4 py-2 rounded-2xl transition-all duration-300 ease-in-out font-medium hover:bg-white hover:bg-opacity-20 hover:-translate-y-0.5"><i class="fas fa-plus"></i> Add Product</a></li>
-                <li><a href="{{ url_for('logout') }}" class="text-white no-underline px-4 py-2 rounded-2xl transition-all duration-300 ease-in-out font-medium hover:bg-white hover:bg-opacity-20 hover:-translate-y-0.5"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-            </ul>
+            <div class="relative ml-auto">
+                <button id="headerDropdownBtn" class="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-2xl font-medium transition-all duration-300 ease-in-out">
+                    <i class="fas fa-bars"></i>
+                    Menu
+                    <i class="fas fa-chevron-down text-sm"></i>
+                </button>
+                <div id="headerDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-52 bg-white text-black rounded-xl shadow-xl overflow-hidden">
+                    <a href="{{ url_for('customer_profile') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-user mr-2"></i> Profile</a>
+                    <a href="{{ url_for('product_form') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-plus mr-2"></i> Add Product</a>
+                    <a href="{{ url_for('cart') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-shopping-cart mr-2"></i> Cart</a>
+                    <a href="{{ url_for('logout') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+                </div>
+            </div>
         </div>
     </header>
     
@@ -108,8 +168,8 @@
                 <div class="p-6">
                     <h3 class="text-xl font-semibold text-black mb-2">{{ product.product_name }}</h3>
                     
-                    {% if product.product_description %}
-                    <p class="text-neutral-gray text-sm leading-relaxed mb-4 line-clamp-3">{{ product.product_description }}</p>
+                    {% if product.description %}
+                    <p class="text-neutral-gray text-sm leading-relaxed mb-4 line-clamp-3">{{ product.description }}</p>
                     {% endif %}
                     
                     {% if product.price is defined %}
@@ -119,7 +179,7 @@
                     <div class="flex gap-2">
                         <button class="bg-primary-blue text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out flex-1 hover:bg-secondary-blue hover:-translate-y-0.5" onclick="viewProduct('{{ product.id }}')">View Details</button>
                         {% if product.stock_quantity is defined and product.stock_quantity > 0 %}
-                        <button class="bg-accent-orange text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out hover:bg-yellow-600 hover:-translate-y-0.5" onclick="addToCart('{{ product.id }}')">Add to Cart</button>
+                        <button class="bg-accent-orange text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out hover:bg-yellow-600 hover:-translate-y-0.5" onclick='addToCart({{ {"id": product.id, "name": product.product_name, "price": product.price, "image": product.product_image }|tojson }})'>Add to Cart</button>
                         {% endif %}
                     </div>
                 </div>
@@ -143,36 +203,50 @@
     
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script>
+        // Hide page loader when content is fully loaded
+        window.addEventListener('load', function () {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function () { loader.style.display = 'none'; }, 200);
+            }
+        });
+
+        // Header dropdown toggle
+        (function() {
+            const btn = document.getElementById('headerDropdownBtn');
+            const menu = document.getElementById('headerDropdownMenu');
+            if (btn && menu) {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    menu.classList.toggle('hidden');
+                });
+                document.addEventListener('click', () => {
+                    menu.classList.add('hidden');
+                });
+            }
+        })();
+
         function viewProduct(productId) {
             // Navigate to product details page
             window.location.href = `/product/${productId}`;
         }
         
-        function addToCart(productId) {
-            // Add product to cart via API
-            fetch('/api/v1/carts', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
-                },
-                body: JSON.stringify({
-                    product_id: productId,
-                    quantity: 1
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification('Product added to cart!', 'success');
-                } else {
-                    showNotification('Failed to add product to cart', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+        async function addToCart(product) {
+            // Server-side cart using database
+            try {
+                const res = await fetch('/cart/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: product.id, quantity: 1 })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to add to cart');
+                showNotification('Product added to cart!', 'success');
+            } catch (e) {
+                console.error('Error:', e);
                 showNotification('Error adding product to cart', 'error');
-            });
+            }
         }
         
         function showNotification(message, type) {

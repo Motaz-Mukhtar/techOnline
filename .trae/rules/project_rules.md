@@ -25,7 +25,8 @@ Imagine yourself as an senior in software engineer with knowledge of all best pr
 
 - The design must be like an e-commerce website, with a clean and modern look.
 
-- Add Loading animation when fetching data.
+- Don't forget to add the loading animation in every page you create and when fetching data from
+  the backend.b
 
 # Back-End
 

@@ -291,7 +291,7 @@ def modify_product(product_id):
         )
 
 @app_views.route('/products', methods=['POST'], strict_slashes=False) # type: ignore
-@require_admin()
+@optional_auth()
 def add_product():
     """
     Create new Product instance and add it to the database.
@@ -386,12 +386,21 @@ def add_product():
                 field_errors={'stock_quantity': ['Stock quantity must be a valid integer']}
             )
         
-        # Create product instance
-        # For admin users, we'll use a special admin customer_id or allow NULL
+        # Determine customer_id based on authentication context
+        # - Admin API key: use special 'admin_user'
+        # - Bearer token: use authenticated user id
+        # - No auth: fall back to provided customer_id in payload
         current_user_id = get_current_user_id()
         if current_user_id is None and is_admin():
-            # For admin API key users, use a special admin customer ID
             current_user_id = 'admin_user'
+        if current_user_id is None:
+            provided_customer_id = data.get('customer_id')
+            if not provided_customer_id:
+                return error_handler.validation_error_response(
+                    message="Customer ID is required when not authenticated",
+                    field_errors={'customer_id': ['customer_id is required']}
+                )
+            current_user_id = provided_customer_id
         
         product_data = {
             'product_name': data['product_name'].strip(),
