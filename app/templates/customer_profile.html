@@ -551,11 +551,11 @@
                             <span class="stat-label">Products</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-number">4.8</span>
+                            <span class="stat-number">{{ average_rating }}</span>
                             <span class="stat-label">Rating</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-number">156</span>
+                            <span class="stat-number">{{ total_sales }}</span>
                             <span class="stat-label">Sales</span>
                         </div>
                     </div>
@@ -610,18 +610,22 @@
             {% if user.products %}
             <div class="products-grid">
                 {% for product in user.products %}
-                <div class="product-card">
-                    <img src="{{ product.product_image }}" alt="{{ product.product_name }}" class="product-image">
+                <div class="product-card" onclick="window.location.href='/product/{{ product.id }}'" style="cursor: pointer;">
+                    {% if product.product_image.startswith('/static/') %}
+                                <img src="http://localhost:5001{{ product.product_image }}" alt="{{ product.product_name }}" class="product-image">
+                                {% else %}
+                                <img src="{{ product.product_image }}" alt="{{ product.product_name }}" class="product-image">
+                                {% endif %}
                     <div class="product-info">
                         <h3 class="product-name">{{ product.product_name }}</h3>
                         <p class="product-price">${{ "%.2f"|format(product.price|float) }}</p>
                         <div class="product-actions">
-                            <button class="btn btn-primary btn-sm" onclick="editProduct({{ product.id }})">
+                            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); editProduct('{{ product.id }}')">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteProduct({{ product.id }})">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteProduct('{{ product.id }}', '{{ access_token }}', event)">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
                         </div>
                     </div>
                 </div>
@@ -724,31 +728,52 @@
             window.location.href = `/shop/product_form?edit=${productId}`;
         }
         
-        function deleteProduct(productId) {
-            if (confirm('Are you sure you want to delete this product?')) {
-                // Simulate API call
-                fetch(`/api/products/${productId}`, {
+        async function deleteProduct(productId, accessToken, event) {
+            if (await confirm('Are you sure you want to delete this product?')) {
+                // Show loading state
+                showNotification('Deleting product...', 'info');
+                console.log(`hello world {{access_token}}`)
+                // Make API call with authentication
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                console.log(accessToken);
+                if (accessToken)
+                    headers['Authorization'] = `Bearer ${accessToken}`;
+
+                fetch(`http://localhost:5001/api/v1/products/${productId}`, {
                     method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
+                    headers: headers
                 })
                 .then(response => {
                     if (response.ok) {
                         // Remove product card from DOM
-                        const productCard = event.target.closest('.product-card');
-                        productCard.remove();
+                        const productCard = event ? event.target.closest('.product-card') : document.querySelector(`[data-product-id="${productId}"]`);
+                        if (productCard) {
+                            productCard.remove();
+                        }
                         showNotification('Product deleted successfully!', 'success');
+                        
+                        // Reload page after a short delay to refresh product count
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
                     } else {
-                        showNotification('Failed to delete product. Please try again.', 'error');
+                        response.json().then(data => {
+                            console.error(data);
+                            const errorMessage = data.message || 'Failed to delete product. Please try again.';
+                            showNotification(errorMessage, 'error');
+                        }).catch(() => {
+                            showNotification('Failed to delete product. Please try again.', 'error');
+                        });
                     }
                 })
                 .catch(error => {
+                    console.error('Delete error:', error);
                     showNotification('An error occurred. Please try again.', 'error');
                 });
             }
         }
-        
         function showNotification(message, type) {
             // Remove existing notifications
             const existingNotifications = document.querySelectorAll('.notification');

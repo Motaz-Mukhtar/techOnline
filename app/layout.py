@@ -5,12 +5,13 @@ from modules.Review.review import Review
 from modules.Products.product import Product
 from modules.Cart.cart import Cart
 from modules.Cart.cart_item import CartItem
+from modules.Order.order import Order
+from modules.Order.order_item import OrderItem
 from modules.utils.file_handler import save_uploaded_file
-from flask import render_template, request, flash, redirect, url_for
+from flask import render_template, request, flash, redirect, url_for, session
 from flask import jsonify
-from flask_login import login_required
+from flask_login import login_required, current_user
 from app import app
-from app.auth import current_user
 from modules import storage
 import requests
 import json
@@ -180,13 +181,36 @@ def product_form():
     """
     Handle product form submission and display using API endpoints.
     
-    GET: Display the product creation form
-    POST: Process form data, validate inputs, handle image upload, and create new product via API
+    GET: Display the product creation/editing form
+    POST: Process form data, validate inputs, handle image upload, and create/update product via API
+    
+    Query Parameters:
+        edit: Product ID for editing existing product
     
     Returns:
         GET: Rendered product form template
         POST: Redirect to shop page on success, or form with errors on failure
     """
+    # Check if we're editing an existing product
+    edit_product_id = request.args.get('edit')
+    existing_product = None
+    
+    if edit_product_id:
+        # Fetch existing product for editing
+        try:
+            existing_product = storage.get(Product, edit_product_id)
+            if not existing_product:
+                flash('Product not found!', 'error')
+                return redirect(url_for('customer_profile'))
+            
+            # Check if user owns this product
+            if existing_product.customer_id != current_user.id:
+                flash('Access denied: You can only edit your own products!', 'error')
+                return redirect(url_for('customer_profile'))
+        except Exception as e:
+            flash(f'Error loading product: {str(e)}', 'error')
+            return redirect(url_for('customer_profile'))
+    
     # Fetch active categories for the form (used by GET and on error cases)
     try:
         all_categories = list(storage.all(Category).values())
@@ -208,26 +232,56 @@ def product_form():
             # Validate required fields
             if not all([product_name, price, description, customer_id]):
                 flash('All fields are required!', 'error')
-                return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
+                template_data = {
+                    'user': current_user.to_dict(),
+                    'categories': categories,
+                    'existing_product': existing_product.to_dict() if existing_product else None,
+                    'is_editing': existing_product is not None
+                }
+                return render_template('product_form.html', **template_data)
 
             # Validate category selection
             if not category_id:
                 flash('Please select a category.', 'error')
-                return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
+                template_data = {
+                    'user': current_user.to_dict(),
+                    'categories': categories,
+                    'existing_product': existing_product.to_dict() if existing_product else None,
+                    'is_editing': existing_product is not None
+                }
+                return render_template('product_form.html', **template_data)
             # Ensure the category exists
             if not storage.get(Category, category_id):
                 flash('Selected category not found.', 'error')
-                return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
+                template_data = {
+                    'user': current_user.to_dict(),
+                    'categories': categories,
+                    'existing_product': existing_product.to_dict() if existing_product else None,
+                    'is_editing': existing_product is not None
+                }
+                return render_template('product_form.html', **template_data)
             
             # Validate price is numeric
             try:
                 price_float = float(price)
                 if price_float <= 0:
                     flash('Price must be a positive number!', 'error')
-                    return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
+                    template_data = {
+                        'user': current_user.to_dict(),
+                        'categories': categories,
+                        'existing_product': existing_product.to_dict() if existing_product else None,
+                        'is_editing': existing_product is not None
+                    }
+                    return render_template('product_form.html', **template_data)
             except ValueError:
                 flash('Price must be a valid number!', 'error')
-                return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
+                template_data = {
+                    'user': current_user.to_dict(),
+                    'categories': categories,
+                    'existing_product': existing_product.to_dict() if existing_product else None,
+                    'is_editing': existing_product is not None
+                }
+                return render_template('product_form.html', **template_data)
             
             # Prepare form data for API
             form_data = {
@@ -247,37 +301,75 @@ def product_form():
                 if file and file.filename:
                     files['product_image'] = (file.filename, file.stream, file.content_type)
             
-            # Create product via API as customer (no admin key required)
-            api_url = 'http://127.0.0.1:5001/api/v1/products'
-            headers = {}
-            
-            if files:
-                # Send multipart form data with file
-                response = requests.post(api_url, data=form_data, files=files, headers=headers, timeout=30)
-            else:
-                # Send JSON data
-                headers['Content-Type'] = 'application/json'
-                response = requests.post(api_url, json=form_data, headers=headers, timeout=30)
-            
-            if response.status_code == 201:
-                api_data = response.json()
-                flash(f'Product "{product_name}" created successfully!', 'success')
-                return redirect(url_for('shop'))
-            else:
-                # Handle API errors
-                try:
-                    error_data = response.json()
-                    error_message = error_data.get('message', f'API Error: {response.status_code}')
-                    if 'field_errors' in error_data:
-                        for field, errors in error_data['field_errors'].items():
-                            for error in errors:
-                                flash(f'{field}: {error}', 'error')
-                    else:
-                        flash(f'Error creating product: {error_message}', 'error')
-                except:
-                    flash(f'Error creating product: HTTP {response.status_code}', 'error')
+            # Determine if we're creating or updating
+            if existing_product:
+                # Update existing product via API
+                api_url = f'http://127.0.0.1:5001/api/v1/products/{existing_product.id}'
+                headers = {'Authorization': f'Bearer {session.get("access_token")}'}
                 
-                return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
+                if files:
+                    # Send multipart form data with file
+                    response = requests.put(api_url, data=form_data, files=files, headers=headers, timeout=30)
+                else:
+                    # Send JSON data
+                    headers['Content-Type'] = 'application/json'
+                    response = requests.put(api_url, json=form_data, headers=headers, timeout=30)
+                
+                if response.status_code == 200:
+                    api_data = response.json()
+                    flash(f'Product "{product_name}" updated successfully!', 'success')
+                    return redirect(url_for('customer_profile'))
+                else:
+                    # Handle API errors for update
+                    try:
+                        error_data = response.json()
+                        error_message = error_data.get('message', f'API Error: {response.status_code}')
+                        if 'field_errors' in error_data:
+                            for field, errors in error_data['field_errors'].items():
+                                for error in errors:
+                                    flash(f'{field}: {error}', 'error')
+                        else:
+                            flash(f'Error updating product: {error_message}', 'error')
+                    except:
+                        flash(f'Error updating product: HTTP {response.status_code}', 'error')
+            else:
+                # Create new product via API
+                api_url = 'http://127.0.0.1:5001/api/v1/products'
+                headers = {'Authorization': f'Bearer {session.get("access_token")}'}
+                
+                if files:
+                    # Send multipart form data with file
+                    response = requests.post(api_url, data=form_data, files=files, headers=headers, timeout=30)
+                else:
+                    # Send JSON data
+                    headers['Content-Type'] = 'application/json'
+                    response = requests.post(api_url, json=form_data, headers=headers, timeout=30)
+                
+                if response.status_code == 201:
+                    api_data = response.json()
+                    flash(f'Product "{product_name}" created successfully!', 'success')
+                    return redirect(url_for('shop'))
+                else:
+                    # Handle API errors
+                    try:
+                        error_data = response.json()
+                        error_message = error_data.get('message', f'API Error: {response.status_code}')
+                        if 'field_errors' in error_data:
+                            for field, errors in error_data['field_errors'].items():
+                                for error in errors:
+                                    flash(f'{field}: {error}', 'error')
+                        else:
+                            flash(f'Error creating product: {error_message}', 'error')
+                    except:
+                        flash(f'Error creating product: HTTP {response.status_code}', 'error')
+                
+                template_data = {
+                    'user': current_user.to_dict(),
+                    'categories': categories,
+                    'existing_product': existing_product.to_dict() if existing_product else None,
+                    'is_editing': existing_product is not None
+                }
+                return render_template('product_form.html', **template_data)
             
         except requests.exceptions.RequestException as e:
             flash(f'Error connecting to API: {str(e)}', 'error')
@@ -310,21 +402,74 @@ def product_form():
                 return redirect(url_for('shop'))
             except Exception as ex:
                 flash(f'Error creating product locally: {str(ex)}', 'error')
-                return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
+                template_data = {
+                    'user': current_user.to_dict(),
+                    'categories': categories,
+                    'existing_product': existing_product.to_dict() if existing_product else None,
+                    'is_editing': existing_product is not None
+                }
+                return render_template('product_form.html', **template_data)
         except Exception as e:
             flash(f'Error creating product: {str(e)}', 'error')
-            return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
+            template_data = {
+                'user': current_user.to_dict(),
+                'categories': categories,
+                'existing_product': existing_product.to_dict() if existing_product else None,
+                'is_editing': existing_product is not None
+            }
+            return render_template('product_form.html', **template_data)
 
-    # GET request: render form with categories
-    return render_template('product_form.html', user=current_user.to_dict(), categories=categories)
+    # GET request: render form with categories and existing product data (if editing)
+    template_data = {
+        'user': current_user.to_dict(),
+        'categories': categories,
+        'existing_product': existing_product.to_dict() if existing_product else None,
+        'is_editing': existing_product is not None
+    }
+    return render_template('product_form.html', **template_data)
 
 
 
-@app.route('/profile', strict_slashes=False)
+@app.route('/customer_profile', methods=['GET'], strict_slashes=False)
+@app.route('/profile', methods=['GET'], strict_slashes=False)
 @login_required
 def customer_profile():
+    """
+    Display customer profile with calculated rating and sales statistics.
+    
+    Rating is calculated from all reviews of the user's products.
+    Sales count is calculated from all order items of the user's products.
+    """
     print(current_user)
-    return render_template('customer_profile.html', user=current_user) # type: ignore
+    
+    # Calculate average rating from all reviews of user's products
+    user_products = storage.all(Product).values()
+    user_products = [p for p in user_products if p.customer_id == current_user.id]
+    
+    total_rating = 0
+    total_reviews = 0
+    
+    for product in user_products:
+        product_reviews = [r for r in storage.all(Review).values() if r.product_id == product.id]
+        for review in product_reviews:
+            total_rating += review.rate
+            total_reviews += 1
+    
+    average_rating = round(total_rating / total_reviews, 1) if total_reviews > 0 else 0.0
+    
+    # Calculate total sales from order items of user's products
+    total_sales = 0
+    
+    for product in user_products:
+        product_order_items = [oi for oi in storage.all(OrderItem).values() if oi.product_id == product.id]
+        for order_item in product_order_items:
+            total_sales += order_item.quantity
+    
+    return render_template('customer_profile.html', 
+                         user=current_user, 
+                         access_token=session.get('access_token'),
+                         average_rating=average_rating,
+                         total_sales=total_sales) # type: ignore
 
 
 
