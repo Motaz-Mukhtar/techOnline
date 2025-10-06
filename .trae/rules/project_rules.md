@@ -28,6 +28,8 @@ Imagine yourself as an senior in software engineer with knowledge of all best pr
 - Don't forget to add the loading animation in every page you create and when fetching data from
   the backend.b
 
+- for any in-app messages or an action like success or error, make sure to show them in a clean and modern way.
+
 # Back-End
 
 - Make sure to validate the input data in every API endpoint, don't trust the client-side validation.

@@ -25,13 +25,20 @@
 <body class="bg-background font-sans m-0 p-0">
     <header class="bg-gradient-to-br from-primary-blue to-secondary-blue text-white py-4 shadow-lg">
         <div class="max-w-6xl mx-auto px-8 flex justify-between items-center flex-wrap gap-4">
-            <a href="{{ url_for('shop') }}" class="text-white no-underline">
-                <h1 class="text-4xl font-black m-0 cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105">tech<span class="text-accent-orange">O</span>nline</h1>
-            </a>
-            <ul class="flex gap-4 list-none m-0 p-0">
-                <li><a href="{{ url_for('shop') }}" class="text-white no-underline px-4 py-2 rounded-2xl transition-all duration-300 ease-in-out font-medium hover:bg-white hover:bg-opacity-20 hover:-translate-y-0.5"><i class="fas fa-store"></i> Shop</a></li>
-                <li><a href="{{ url_for('cart') }}" class="text-white no-underline px-4 py-2 rounded-2xl transition-all duration-300 ease-in-out font-medium hover:bg-white hover:bg-opacity-20 hover:-translate-y-0.5"><i class="fas fa-shopping-cart"></i> Cart</a></li>
-            </ul>
+            <h1 class="text-4xl font-black m-0 cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105">tech<span class="text-accent-orange">O</span>nline</h1>
+            <div class="relative ml-auto">
+                <button id="headerDropdownBtn" class="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-2xl font-medium transition-all duration-300 ease-in-out">
+                    <i class="fas fa-bars"></i>
+                    Menu
+                    <i class="fas fa-chevron-down text-sm"></i>
+                </button>
+                <div id="headerDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-52 bg-white text-black rounded-xl shadow-xl overflow-hidden">
+                    <a href="{{ url_for('customer_profile') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-user mr-2"></i> Profile</a>
+                    <a href="{{ url_for('product_form') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-plus mr-2"></i> Add Product</a>
+                    <a href="{{ url_for('cart') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-shopping-cart mr-2"></i> Cart</a>
+                    <a href="{{ url_for('logout') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -144,6 +151,21 @@
     </main>
 
     <script>
+        // Header dropdown toggle (match shop page behavior)
+        (function() {
+            const btn = document.getElementById('headerDropdownBtn');
+            const menu = document.getElementById('headerDropdownMenu');
+            if (btn && menu) {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    menu.classList.toggle('hidden');
+                });
+                document.addEventListener('click', () => {
+                    menu.classList.add('hidden');
+                });
+            }
+        })();
+
         // Prepare product data from server-rendered values for cart operations
         const product = {
             id: "{{ product.id }}",
