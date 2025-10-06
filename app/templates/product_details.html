@@ -41,7 +41,11 @@
                 <div class="p-6 flex items-center justify-center bg-background">
                     <div class="w-full h-64 flex items-center justify-center bg-background">
                         {% if product and product.product_image %}
-                        <img src="{{ product.product_image }}" alt="{{ product.product_name or 'Product' }}" class="max-h-64 object-contain">
+                        {% if product.product_image.startswith('/static/') %}
+  <img src="http://localhost:5001{{ product.product_image }}" alt="{{ product.product_name or 'Product' }}" class="max-h-64 object-contain">
+{% else %}
+<img src="{{ product.product_image }}" alt="{{ product.product_name or 'Product' }}" class="max-h-64 object-contain">
+{% endif %}
                         {% else %}
                         <i class="fas fa-image text-6xl text-neutral-gray"></i>
                         {% endif %}

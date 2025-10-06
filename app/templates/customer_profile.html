@@ -610,7 +610,7 @@
             {% if user.products %}
             <div class="products-grid">
                 {% for product in user.products %}
-                <div class="product-card" onclick="window.location.href='/product/{{ product.id }}'" style="cursor: pointer;">
+                <div class="product-card">
                     {% if product.product_image.startswith('/static/') %}
                                 <img src="http://localhost:5001{{ product.product_image }}" alt="{{ product.product_name }}" class="product-image">
                                 {% else %}
@@ -620,10 +620,10 @@
                         <h3 class="product-name">{{ product.product_name }}</h3>
                         <p class="product-price">${{ "%.2f"|format(product.price|float) }}</p>
                         <div class="product-actions">
-                            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); editProduct('{{ product.id }}')">
+                            <button class="btn btn-primary btn-sm" onclick="editProduct('{{ product.id }}')">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
-                            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteProduct('{{ product.id }}', '{{ access_token }}', event)">
+                            <button class="btn btn-danger btn-sm" onclick="deleteProduct('{{ product.id }}', '{{ access_token }}', event)">
                                             <i class="fas fa-trash"></i> Delete
                                         </button>
                         </div>

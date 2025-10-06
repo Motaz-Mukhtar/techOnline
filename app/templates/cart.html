@@ -56,7 +56,7 @@
                 <div class="flex items-center gap-4 py-4 border-b">
                     <div class="w-16 h-16 bg-background flex items-center justify-center rounded">
                         {% if item.image %}
-                        <img src="{{ item.image }}" alt="{{ item.name }}" class="w-16 h-16 object-cover rounded">
+                        <img src="http://localhost:5001{{ item.image }}" alt="{{ item.name }}" class="w-16 h-16 object-cover rounded">
                         {% else %}
                         <i class="fas fa-image text-2xl text-neutral-gray"></i>
                         {% endif %}
@@ -123,18 +123,30 @@
                 const qtyEl = document.getElementById(`qty-${productId}`);
                 const currentQty = parseInt(qtyEl.textContent || '1', 10);
                 const newQty = Math.max(1, currentQty + delta);
+                
                 const res = await fetch('/cart/update_item', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ product_id: productId, quantity: newQty })
                 });
+                
+                if (res.status === 401 || res.status === 403) {
+                    alert('Please log in to update cart items.');
+                    window.location.href = '/login';
+                    return;
+                }
+                
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Failed to update');
+                
+                if (!res.ok) {
+                    throw new Error(data.error || `Server error: ${res.status}`);
+                }
+                
                 // Simple approach: reload to reflect server state
                 window.location.reload();
             } catch (e) {
-                alert('Failed to update quantity');
-                console.error(e);
+                console.error('Cart update error:', e);
+                alert(`Failed to update quantity: ${e.message}`);
             }
         }
 

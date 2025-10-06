@@ -44,6 +44,11 @@
             color: white;
         }
 
+        /* Dropdown menu z-index to appear above all other containers */
+        #headerDropdownMenu {
+            z-index: 2000 !important;
+        }
+
         /* Global page loader overlay with three dots animation */
         .loader-overlay {
             position: fixed;
@@ -149,7 +154,11 @@
             <div class="bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 ease-in-out cursor-pointer hover:-translate-y-1 hover:shadow-xl">
                 <div class="relative">
                     {% if product.product_image %}
+                        {% if product.product_image.startswith('/static/') %}
+                    <img src="http://localhost:5001{{ product.product_image }}" alt="{{ product.product_name }}" class="w-full h-48 object-cover">
+                        {% else %}
                     <img src="{{ product.product_image }}" alt="{{ product.product_name }}" class="w-full h-48 object-cover">
+                        {% endif %}
                     {% else %}
                     <div class="w-full h-48 flex items-center justify-center bg-background">
                         <i class="fas fa-image text-5xl text-neutral-gray"></i>
@@ -228,8 +237,8 @@
         })();
 
         function viewProduct(productId) {
-            // Navigate to product details page
-            window.location.href = `/product/${productId}`;
+            // Navigate to product details page using Flask url_for for scalability
+            window.location.href = "{{ url_for('product_details', product_id='PRODUCT_ID') }}".replace('PRODUCT_ID', productId);
         }
         
         async function addToCart(product) {

@@ -8,7 +8,11 @@
 </head>
 <body>
     {% for i in data %}
+        {% if i.product_image.startswith('/static/') %}
+        <img src="http://localhost:5001{{ i.product_image }}" alt="">
+        {% else %}
         <img src="{{ i.product_image }}" alt="">
+        {% endif %}
     {% endfor %}
 </body>
 </html>

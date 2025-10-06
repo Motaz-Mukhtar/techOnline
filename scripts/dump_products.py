@@ -25,6 +25,8 @@ def main():
             'customer_id': d.get('customer_id'),
             'price': d.get('price'),
             'category_id': d.get('category_id'),
+            'product_image': d.get('product_image'),
+            'product_image_filename': d.get('product_image_filename'),
         })
     print(json.dumps(out, indent=2))
 

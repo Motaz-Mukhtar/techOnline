@@ -11,6 +11,9 @@ from modules import storage
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = 'get_login'
+login_manager.login_message = 'Please log in to access this page.'
+login_manager.login_message_category = 'info'
 
 # form to add customer to database
 class CustomerSignupForm(FlaskForm):
@@ -52,6 +55,27 @@ def login():
             if user.email == user_email and bcrypt.check_password_hash(user.password, user_pass):
                 login_user(user)
                 load_user(user.id)
+                
+                # Get JWT token from API
+                try:
+                    import requests
+                    api_url = 'http://127.0.0.1:5001/api/v1/auth/login'
+                    api_data = {
+                        'email': user_email,
+                        'password': user_pass
+                    }
+                    response = requests.post(api_url, json=api_data, timeout=10)
+                    
+                    if response.status_code == 200:
+                        api_response = response.json()
+                        access_token = api_response.get('data', {}).get('token')
+                        if access_token:
+                            session['access_token'] = access_token
+                    else:
+                        flash('Warning: Could not obtain API token', 'warning')
+                except Exception as e:
+                    flash(f'Warning: API connection failed: {str(e)}', 'warning')
+                
                 return redirect(url_for('shop'))
 
         flash(f'Wrong Email or Password', 'error')
@@ -71,6 +95,8 @@ def test():
 @app.route('/logout')
 @login_required
 def logout():
+    # Clear access_token from session
+    session.pop('access_token', None)
     logout_user()
     return redirect(url_for('login'))
 
