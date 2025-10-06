@@ -12,6 +12,35 @@ from flask import render_template, request, flash, redirect, url_for, session
 from flask import jsonify
 from flask_login import login_required, current_user
 from app import app
+
+
+@app.route('/api/token', methods=['GET'], strict_slashes=False)
+@login_required
+def get_jwt_token():
+    """
+    Provide the JWT token to the frontend.
+    
+    Returns:
+        JSON response with the access token from the session
+    """
+    try:
+        access_token = session.get('access_token')
+        if access_token:
+            return jsonify({
+                'success': True,
+                'access_token': access_token
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'No access token found in session'
+            }), 404
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Error retrieving token: {str(e)}'
+        }), 500
+from app import app
 from modules import storage
 import requests
 import json
@@ -67,6 +96,20 @@ def shop():
         Rendered shop template with products or search results from API
     """
     try:
+        # Fetch the current user's cart and get item count
+        cart = None
+        cart_item_count = 0
+        
+        # Find the cart by customer_id (not by cart id)
+        for c in storage.all(Cart).values():
+            if c.customer_id == current_user.id:
+                cart = c
+                break
+        
+        if cart:
+            # Use the built-in get_item_count method which sums all quantities
+            cart_item_count = cart.get_item_count()
+
         if request.method == 'POST':
             product_name = request.form.get('product_name', '').strip()
             
@@ -99,11 +142,11 @@ def shop():
                         
                         matching_products.append(ProductProxy(product_dict))
                     
-                    return render_template('layout.html', products=matching_products, search_query=product_name)
+                    return render_template('layout.html', products=matching_products, search_query=product_name, cart_item_count=cart_item_count)
                 else:
                     flash(f'Error fetching search results: {response.status_code}', 'error')
                     # Fallback to empty results
-                    return render_template('layout.html', products=[], search_query=product_name)
+                    return render_template('layout.html', products=[], search_query=product_name, cart_item_count=cart_item_count)
             else:
                 # If no search query, get all products from API
                 api_url = 'http://127.0.0.1:5001/api/v1/products'
@@ -130,10 +173,10 @@ def shop():
                         
                         products_list.append(ProductProxy(product_dict))
                     
-                    return render_template('layout.html', products=products_list)
+                    return render_template('layout.html', products=products_list, cart_item_count=cart_item_count)
                 else:
                     flash(f'Error fetching products: {response.status_code}', 'error')
-                    return render_template('layout.html', products=[])
+                    return render_template('layout.html', products=[], cart_item_count=cart_item_count)
         
         # GET request - get all products from API
         api_url = 'http://127.0.0.1:5001/api/v1/products'
@@ -160,20 +203,19 @@ def shop():
                 
                 products_list.append(ProductProxy(product_dict))
             
-            return render_template('layout.html', products=products_list)
+            return render_template('layout.html', products=products_list, cart_item_count=cart_item_count)
         else:
             flash(f'Error fetching products: {response.status_code}', 'error')
-            return render_template('layout.html', products=[])
+            return render_template('layout.html', products=[], cart_item_count=cart_item_count)
             
     except requests.exceptions.RequestException as e:
         flash(f'API connection error: {str(e)}', 'error')
         # Fallback to direct database access if API is unavailable
         products_list = list(storage.all(Product).values())
-        return render_template('layout.html', products=products_list)
+        return render_template('layout.html', products=products_list, cart_item_count=cart_item_count)
     except Exception as e:
         flash(f'Unexpected error: {str(e)}', 'error')
-        return render_template('layout.html', products=[])
-
+        return render_template('layout.html', products=[], cart_item_count=cart_item_count)
 
 @app.route('/shop/product_form', methods=['GET', 'POST'], strict_slashes=False)
 @login_required
@@ -195,10 +237,17 @@ def product_form():
     edit_product_id = request.args.get('edit')
     existing_product = None
     
+    print(f"DEBUG: Edit product ID from URL: {edit_product_id}")
+    
     if edit_product_id:
         # Fetch existing product for editing
         try:
             existing_product = storage.get(Product, edit_product_id)
+            
+            print(f"DEBUG: Found existing product: {existing_product}")
+            if existing_product:
+                print(f"DEBUG: Product data: {existing_product.to_dict()}")
+            
             if not existing_product:
                 flash('Product not found!', 'error')
                 return redirect(url_for('customer_profile'))
@@ -238,6 +287,11 @@ def product_form():
                     'existing_product': existing_product.to_dict() if existing_product else None,
                     'is_editing': existing_product is not None
                 }
+                
+                print(f"DEBUG: Template data being passed:")
+                print(f"DEBUG: - is_editing: {template_data['is_editing']}")
+                print(f"DEBUG: - existing_product: {template_data['existing_product']}")
+                
                 return render_template('product_form.html', **template_data)
 
             # Validate category selection
@@ -307,6 +361,10 @@ def product_form():
                 api_url = f'http://127.0.0.1:5001/api/v1/products/{existing_product.id}'
                 headers = {'Authorization': f'Bearer {session.get("access_token")}'}
                 
+                print(f"DEBUG: Updating product via PUT request to: {api_url}")
+                print(f"DEBUG: Form data: {form_data}")
+                print(f"DEBUG: Files: {files}")
+                
                 if files:
                     # Send multipart form data with file
                     response = requests.put(api_url, data=form_data, files=files, headers=headers, timeout=30)
@@ -314,6 +372,9 @@ def product_form():
                     # Send JSON data
                     headers['Content-Type'] = 'application/json'
                     response = requests.put(api_url, json=form_data, headers=headers, timeout=30)
+                
+                print(f"DEBUG: PUT response status: {response.status_code}")
+                print(f"DEBUG: PUT response content: {response.text}")
                 
                 if response.status_code == 200:
                     api_data = response.json()
@@ -337,6 +398,10 @@ def product_form():
                 api_url = 'http://127.0.0.1:5001/api/v1/products'
                 headers = {'Authorization': f'Bearer {session.get("access_token")}'}
                 
+                print(f"DEBUG: Creating new product via POST request to: {api_url}")
+                print(f"DEBUG: Form data: {form_data}")
+                print(f"DEBUG: Files: {files}")
+                
                 if files:
                     # Send multipart form data with file
                     response = requests.post(api_url, data=form_data, files=files, headers=headers, timeout=30)
@@ -344,6 +409,9 @@ def product_form():
                     # Send JSON data
                     headers['Content-Type'] = 'application/json'
                     response = requests.post(api_url, json=form_data, headers=headers, timeout=30)
+                
+                print(f"DEBUG: POST response status: {response.status_code}")
+                print(f"DEBUG: POST response content: {response.text}")
                 
                 if response.status_code == 201:
                     api_data = response.json()
@@ -376,7 +444,6 @@ def product_form():
             # Fallback: create product directly in the local database
             try:
                 # Create and save product locally
-                from modules.Products.product import Product
                 local_product = Product(
                     product_name=product_name,
                     description=description,
@@ -426,6 +493,11 @@ def product_form():
         'existing_product': existing_product.to_dict() if existing_product else None,
         'is_editing': existing_product is not None
     }
+    
+    print(f"DEBUG: Final template data for GET request:")
+    print(f"DEBUG: - is_editing: {template_data['is_editing']}")
+    print(f"DEBUG: - existing_product: {template_data['existing_product']}")
+    
     return render_template('product_form.html', **template_data)
 
 
@@ -495,6 +567,20 @@ def product_details(product_id):
     Render product details page.
     """
     try:
+        # Fetch the current user's cart and get item count
+        cart = None
+        cart_item_count = 0
+        
+        # Find the cart by customer_id (not by cart id)
+        for c in storage.all(Cart).values():
+            if c.customer_id == current_user.id:
+                cart = c
+                break
+        
+        if cart:
+            # Use the built-in get_item_count method which sums all quantities
+            cart_item_count = cart.get_item_count()
+
         # Try fetching product from API
         api_url = f'http://127.0.0.1:5000/api/v1/products/{product_id}'
         response = requests.get(api_url, timeout=10)
@@ -571,7 +657,12 @@ def product_details(product_id):
         except Exception:
             pass
 
-        return render_template('product_details.html', product=product_data, seller=seller_info, category_name=category_name, reviews=reviews, has_reviewed=has_reviewed)
+        return render_template('product_details.html', product=product_data,
+                                                       cart_item_count=cart_item_count,
+                                                       seller=seller_info,
+                                                       category_name=category_name,
+                                                       reviews=reviews,
+                                                       has_reviewed=has_reviewed)
 
     except requests.exceptions.RequestException:
         # Network/API error: use storage fallback
@@ -721,6 +812,20 @@ def cart():
     Cart page rendered with server-side data from database.
     """
     try:
+        # Fetch the current user's cart and get item count
+        cart = None
+        cart_item_count = 0
+        
+        # Find the cart by customer_id (not by cart id)
+        for c in storage.all(Cart).values():
+            if c.customer_id == current_user.id:
+                cart = c
+                break
+        
+        if cart:
+            # Use the built-in get_item_count method which sums all quantities
+            cart_item_count = cart.get_item_count()
+
         # Find current user's cart
         user_id = getattr(current_user, 'id', None)
         cart_obj = None
@@ -751,7 +856,10 @@ def cart():
                 })
             total = cart_obj.total_price
 
-        return render_template('cart.html', cart=cart_obj, items=items, total=total)
+        return render_template('cart.html', cart=cart_obj,
+                                            items=items,
+                                            total=total,
+                                            cart_item_count=cart_item_count)
     except Exception as e:
         flash(f'Failed to load cart: {str(e)}', 'error')
         return render_template('cart.html', cart=None, items=[], total=0.0)

@@ -28,17 +28,28 @@
             <a href="{{ url_for('shop') }}" class="text-white no-underline">
                 <h1 class="text-4xl font-black m-0 cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105">tech<span class="text-accent-orange">O</span>nline</h1>
             </a>
-            <div class="relative ml-auto">
-                <button id="cartDropdownBtn" type="button" class="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-2xl font-medium transition-all duration-300 ease-in-out">
-                    <i class="fas fa-bars"></i>
-                    Menu
-                    <i class="fas fa-chevron-down text-sm"></i>
-                </button>
-                <div id="cartDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-52 bg-white text-black rounded-xl shadow-xl overflow-hidden z-50">
-                    <a href="{{ url_for('customer_profile') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-user mr-2"></i> Profile</a>
-                    <a href="{{ url_for('cart') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-shopping-cart mr-2"></i> Cart</a>
-                    <a href="{{ url_for('product_form') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-plus mr-2"></i> Add Product</a>
-                    <a href="{{ url_for('logout') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+            <div class="flex items-center gap-4 ml-auto">
+                <!-- Cart Icon with Badge -->
+                <div class="relative">
+                    <a href="{{ url_for('cart') }}" class="flex items-center justify-center w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full transition-all duration-300 ease-in-out hover:scale-105">
+                        <i class="fas fa-shopping-cart text-lg"></i>
+                    </a>
+                    <span id="cartBadge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center min-w-[20px] px-1">{{ cart_item_count }}</span>
+                </div>
+                
+                <!-- Menu Dropdown -->
+                <div class="relative">
+                    <button id="cartDropdownBtn" type="button" class="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-2xl font-medium transition-all duration-300 ease-in-out">
+                        <i class="fas fa-bars"></i>
+                        Menu
+                        <i class="fas fa-chevron-down text-sm"></i>
+                    </button>
+                    <div id="cartDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-52 bg-white text-black rounded-xl shadow-xl overflow-hidden z-50">
+                        <a href="{{ url_for('customer_profile') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-user mr-2"></i> Profile</a>
+                        <a href="{{ url_for('shop') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-store mr-2"></i> Shop</a>
+                        <a href="{{ url_for('product_form') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-plus mr-2"></i> Add Product</a>
+                        <a href="{{ url_for('logout') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -118,6 +129,57 @@
             }
         })();
 
+        // Function to get JWT token from session
+        async function getJWTToken() {
+            try {
+                const tokenRes = await fetch('/api/token');
+                if (tokenRes.ok) {
+                    const tokenData = await tokenRes.json();
+                    return tokenData.success ? tokenData.access_token : null;
+                }
+            } catch (error) {
+                console.error('Error getting JWT token:', error);
+            }
+            return null;
+        }
+        
+        // Function to update cart badge count
+        async function updateCartBadge() {
+            try {
+                const token = await getJWTToken();
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
+                const res = await fetch('/api/v1/cart/count', {
+                    method: 'GET',
+                    headers: headers
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    const badge = document.getElementById('cartBadge');
+                    if (badge) {
+                        badge.textContent = data.count || 0;
+                        badge.style.display = (data.count && data.count > 0) ? 'flex' : 'none';
+                    }
+                } else {
+                    console.error('Failed to fetch cart count:', res.status, res.statusText);
+                }
+            } catch (error) {
+                console.error('Error updating cart badge:', error);
+            }
+        }
+        
+        // Update cart badge on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartBadge();
+        });
+
         async function changeQty(productId, delta) {
             try {
                 const qtyEl = document.getElementById(`qty-${productId}`);
@@ -144,6 +206,7 @@
                 
                 // Simple approach: reload to reflect server state
                 window.location.reload();
+                updateCartBadge(); // Update cart badge count
             } catch (e) {
                 console.error('Cart update error:', e);
                 alert(`Failed to update quantity: ${e.message}`);
@@ -160,6 +223,7 @@
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'Failed to remove');
                 window.location.reload();
+                updateCartBadge(); // Update cart badge count
             } catch (e) {
                 alert('Failed to remove item');
                 console.error(e);

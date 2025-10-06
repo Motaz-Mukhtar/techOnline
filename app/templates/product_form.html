@@ -525,17 +525,20 @@
         <div class="header-content">
             <nav class="form-nav">
                 <a href="{{ url_for('shop') }}" class="logo">tech<span>O</span>nline</a>
-                <div class="relative">
-                    <button id="productFormDropdownBtn" type="button" class="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-2xl font-medium transition-all duration-300 ease-in-out">
-                        <i class="fas fa-bars text-black"></i>
-                        <span class="text-black">Menu</span>
-                        <i class="fas fa-chevron-down text-sm"></i>
-                    </button>
-                    <div id="productFormDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-52 bg-white text-black rounded-xl shadow-xl overflow-hidden z-50">
-                        <a href="{{ url_for('customer_profile') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-user mr-2"></i> Profile</a>
-                        <a href="{{ url_for('cart') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-shopping-cart mr-2"></i> Cart</a>
-                        <a href="{{ url_for('product_form') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-plus mr-2"></i> Add Product</a>
-                        <a href="{{ url_for('logout') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+                <div class="flex items-center gap-4 ml-auto">
+                    <!-- Menu Dropdown -->
+                    <div class="relative">
+                        <button id="productFormDropdownBtn" type="button" class="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-2xl font-medium transition-all duration-300 ease-in-out">
+                            <i class="fas fa-bars text-black"></i>
+                            <span class="text-black">Menu</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                        <div id="productFormDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-52 bg-white text-black rounded-xl shadow-xl overflow-hidden z-50">
+                            <a href="{{ url_for('customer_profile') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-user mr-2"></i> Profile</a>
+                            <a href="{{ url_for('shop') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-store mr-2"></i> Shop</a>
+                            <a href="{{ url_for('product_form') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-plus mr-2"></i> Add Product</a>
+                            <a href="{{ url_for('logout') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -552,6 +555,10 @@
                 </div>
                 
                 <form id="productForm" action="{{ url_for('product_form') }}" method="POST" enctype="multipart/form-data">
+                    {% if existing_product and is_editing %}
+                    <input type="hidden" name="_method" value="PUT">
+                    <input type="hidden" name="product_id" value="{{ existing_product.id }}">
+                    {% endif %}
                     <div class="form-grid">
                         <div class="form-row">
                             <div class="form-group">
@@ -695,6 +702,55 @@
             const submitBtn = document.getElementById('submitBtn');
             const loadingSpinner = document.getElementById('loadingSpinner');
             const btnText = submitBtn.querySelector('.btn-text');
+            
+            // Check if we're editing an existing product
+            {% if existing_product and is_editing %}
+            const existingProduct = {{ existing_product | tojson }};
+            
+            // Populate form fields with existing data
+            if (existingProduct) {
+                document.getElementById('productName').value = existingProduct.product_name || '';
+                document.getElementById('productPrice').value = existingProduct.price || '';
+                document.getElementById('productDescription').value = existingProduct.description || '';
+                document.getElementById('categoryId').value = existingProduct.category_id || '';
+                document.getElementById('stockQuantity').value = existingProduct.stock_quantity || 10;
+                document.getElementById('minStockLevel').value = existingProduct.min_stock_level || 5;
+                
+                // Update character counts
+                const nameCount = document.getElementById('nameCount');
+                const descriptionCount = document.getElementById('descriptionCount');
+                if (nameCount) nameCount.textContent = `${existingProduct.product_name ? existingProduct.product_name.length : 0}/100`;
+                if (descriptionCount) descriptionCount.textContent = `${existingProduct.description ? existingProduct.description.length : 0}/1000`;
+                
+                // Update form title and button text
+                const formTitle = document.querySelector('.form-title');
+                const formSubtitle = document.querySelector('.form-subtitle');
+                const submitBtnText = document.querySelector('.btn-text');
+                
+                if (formTitle) formTitle.textContent = 'Edit Product';
+                if (formSubtitle) formSubtitle.textContent = 'Update your product information';
+                if (submitBtnText) submitBtnText.innerHTML = '<i class="fas fa-save"></i> Update Product';
+                
+                // Show existing product image if available
+                if (existingProduct.product_image) {
+                    const imagePreview = document.getElementById('imagePreview');
+                    const previewImage = document.getElementById('previewImage');
+                    const fileUploadContainer = document.getElementById('fileUploadContainer');
+                    const productImageInput = document.getElementById('productImage');
+                    
+                    if (imagePreview && previewImage && fileUploadContainer) {
+                        previewImage.src = existingProduct.product_image;
+                        imagePreview.style.display = 'block';
+                        fileUploadContainer.style.display = 'none';
+                        // Make image upload optional for editing
+                        productImageInput.removeAttribute('required');
+                    }
+                }
+                
+                // Update progress bar
+                updateProgress();
+            }
+            {% endif %}
             
             // Form fields
             const productName = document.getElementById('productName');
@@ -873,11 +929,15 @@
                 isValid &= validateField(productPrice, 'priceError', 'Please enter a valid price');
                 isValid &= validateField(productDescription, 'descriptionError', 'Description must be between 10-1000 characters');
                 
-                // Validate image
+                // Validate image (only required for new products)
+                {% if existing_product and is_editing %}
+                // Image is optional when editing
+                {% else %}
                 if (productImage.files.length === 0) {
                     showError('imageError', 'Please select a product image');
                     isValid = false;
                 }
+                {% endif %}
                 
                 if (isValid) {
                     // Show loading state
@@ -885,6 +945,24 @@
                     btnText.style.display = 'none';
                     loadingSpinner.style.display = 'block';
                     
+                    // Check if we're editing or creating
+                    {% if existing_product and is_editing %}
+                    // Update form action for editing
+                    form.action = "{{ url_for('product_form', edit=existing_product.id) }}";
+                    
+                    // Simulate form submission delay
+                    setTimeout(() => {
+                        showNotification('Product updated successfully!', 'success');
+                        // In real implementation, submit the form
+                        form.submit();
+                        
+                        // Reset form for demo
+                        setTimeout(() => {
+                            form.reset();
+                            imagePreview.style.display = 'none';
+                            fileUploadContainer.style.display = 'block';
+                    {% else %}
+                    // Keep default action for creating
                     // Simulate form submission delay
                     setTimeout(() => {
                         showNotification('Product added successfully!', 'success');
@@ -896,6 +974,7 @@
                             form.reset();
                             imagePreview.style.display = 'none';
                             fileUploadContainer.style.display = 'block';
+                    {% endif %}
                             progressBar.style.width = '0%';
                             nameCount.textContent = '0/100';
                             descriptionCount.textContent = '0/1000';
@@ -945,6 +1024,8 @@
                     }, 300);
                 }, 3000);
             }
+
+
 
             // Header dropdown toggle
             const dropdownBtn = document.getElementById('productFormDropdownBtn');

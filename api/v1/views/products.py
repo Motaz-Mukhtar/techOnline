@@ -132,7 +132,7 @@ def get_product(product_id):
         )
 
 @app_views.route('/products/<product_id>', methods=['PUT', 'DELETE'], strict_slashes=False) # type: ignore
-@require_admin()
+@require_auth()
 def modify_product(product_id):
     """
     Update or delete a product.
@@ -153,6 +153,13 @@ def modify_product(product_id):
             return error_handler.not_found_error_response("Product")
         
         if request.method == 'PUT':
+            # Check if user can edit this product (owner or admin)
+            current_user_id = get_current_user_id()
+            if not is_admin() and product.customer_id != current_user_id:
+                return error_handler.access_denied_error_response(
+                    message="Access denied: You can only edit your own products"
+                )
+            
             # Handle both JSON and form data
             if request.is_json:
                 data = request.get_json()
@@ -272,6 +279,13 @@ def modify_product(product_id):
                 )
         
         elif request.method == 'DELETE':
+            # Check if user can delete this product (owner or admin)
+            current_user_id = get_current_user_id()
+            if not is_admin() and product.customer_id != current_user_id:
+                return error_handler.access_denied_error_response(
+                    message="Access denied: You can only delete your own products"
+                )
+            
             # Delete associated image file if exists
             if product.product_image_filename:
                 delete_uploaded_file(product.product_image_filename, 'product')

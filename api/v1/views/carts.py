@@ -336,3 +336,35 @@ def get_customer_cart(customer_id):
         return make_response(jsonify({"error": "Customer has no cart"}), 404)
     
     return make_response(jsonify(customer_cart.to_dict()), 200)
+
+
+@app_views.route('/cart/count', methods=['GET'], strict_slashes=False) # type: ignore
+@require_auth(['read'])
+def get_cart_count():
+    """
+    Get the total count of items in the current user's cart.
+    
+    Returns:
+        JSON response with cart item count
+    """
+    current_user_id = get_current_user_id()
+    if not current_user_id:
+        return make_response(jsonify({"error": "Authentication required"}), 401)
+    
+    # Find customer's cart
+    carts = storage.all(Cart).values()
+    customer_cart = None
+    
+    for cart in carts:
+        if cart.customer_id == current_user_id:
+            customer_cart = cart
+            break
+    
+    if not customer_cart:
+        # Return 0 count if no cart exists
+        return make_response(jsonify({"count": 0}), 200)
+    
+    # Get total item count using the cart's get_item_count method
+    total_count = customer_cart.get_item_count()
+    
+    return make_response(jsonify({"count": total_count}), 200)
