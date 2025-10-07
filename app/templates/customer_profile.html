@@ -732,14 +732,71 @@
             if (await confirm('Are you sure you want to delete this product?')) {
                 // Show loading state
                 showNotification('Deleting product...', 'info');
-                console.log(`hello world {{access_token}}`)
+                
+                // Debug: Check if access token is available
+                console.log('Access Token:', accessToken);
+                
+                // If no access token passed, try to get it from the API
+                if (!accessToken || accessToken === 'None' || accessToken === '') {
+                    try {
+                        const tokenResponse = await fetch('/api/token');
+                        console.log('Token response status:', tokenResponse.status);
+                        console.log('Token response headers:', tokenResponse.headers.get('content-type'));
+                        
+                        // Check if response is JSON (authenticated) or HTML (redirected to login)
+                        const contentType = tokenResponse.headers.get('content-type');
+                        if (contentType && contentType.includes('text/html')) {
+                            // User is not logged in, redirect to login
+                            showNotification('Session expired. Please log in again.', 'error');
+                            setTimeout(() => {
+                                window.location.href = '/login';
+                            }, 2000);
+                            return;
+                        }
+                        
+                        if (tokenResponse.ok) {
+                            const tokenData = await tokenResponse.json();
+                            if (tokenData.success) {
+                                accessToken = tokenData.access_token;
+                                console.log('Retrieved token from API:', accessToken);
+                            } else {
+                                showNotification('No valid session found. Please log in again.', 'error');
+                                setTimeout(() => {
+                                    window.location.href = '/login';
+                                }, 2000);
+                                return;
+                            }
+                        } else {
+                            showNotification('Authentication failed. Please log in again.', 'error');
+                            setTimeout(() => {
+                                window.location.href = '/login';
+                            }, 2000);
+                            return;
+                        }
+                    } catch (error) {
+                        console.error('Error getting token:', error);
+                        showNotification('Authentication error. Please log in again.', 'error');
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 2000);
+                        return;
+                    }
+                }
+                
                 // Make API call with authentication
                 const headers = {
                     'Content-Type': 'application/json'
                 };
-                console.log(accessToken);
-                if (accessToken)
+                
+                if (accessToken && accessToken !== 'None' && accessToken !== '') {
                     headers['Authorization'] = `Bearer ${accessToken}`;
+                } else {
+                    showNotification('Authentication required. Please log in again.', 'error');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                    return;
+                }
 
                 fetch(`http://localhost:5001/api/v1/products/${productId}`, {
                     method: 'DELETE',
