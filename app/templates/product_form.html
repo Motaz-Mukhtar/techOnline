@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechOnline | Add Product</title>
+    <title>TechOnline | {% if existing_product and is_editing %}Edit Product{% else %}Add Product{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -524,7 +524,7 @@
     <div class="form-header">
         <div class="header-content">
             <nav class="form-nav">
-                <a href="{{ url_for('shop') }}" class="logo">tech<span>O</span>nline</a>
+                <a href="{{ url_for('shop.shop') }}" class="logo">tech<span>O</span>nline</a>
                 <div class="flex items-center gap-4 ml-auto">
                     <!-- Menu Dropdown -->
                     <div class="relative">
@@ -534,16 +534,16 @@
                             <i class="fas fa-chevron-down text-sm"></i>
                         </button>
                         <div id="productFormDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-52 bg-white text-black rounded-xl shadow-xl overflow-hidden z-50">
-                            <a href="{{ url_for('customer_profile') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-user mr-2"></i> Profile</a>
-                            <a href="{{ url_for('shop') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-store mr-2"></i> Shop</a>
-                            <a href="{{ url_for('product_form') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-plus mr-2"></i> Add Product</a>
+                            <a href="{{ url_for('profile.customer_profile') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-user mr-2"></i> Profile</a>
+                            <a href="{{ url_for('shop.shop') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-store mr-2"></i> Shop</a>
+                            <a href="{{ url_for('products.product_form') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-plus mr-2"></i> Add Product</a>
                             <a href="{{ url_for('logout') }}" class="block px-4 py-3 hover:bg-gray-100 no-underline text-black"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
                         </div>
                     </div>
                 </div>
             </nav>
-            <h1 class="form-title">Add New Product</h1>
-            <p class="form-subtitle">Share your amazing products with the world</p>
+            <h1 class="form-title">{% if existing_product and is_editing %}Edit Product{% else %}Add New Product{% endif %}</h1>
+            <p class="form-subtitle">{% if existing_product and is_editing %}Update your product details{% else %}Share your amazing products with the world{% endif %}</p>
         </div>
     </div>
     
@@ -554,7 +554,7 @@
                     <div class="progress-bar" id="progressBar"></div>
                 </div>
                 
-                <form id="productForm" action="{{ url_for('product_form') }}" method="POST" enctype="multipart/form-data">
+                <form id="productForm" action="{% if existing_product and is_editing %}{{ url_for('products.product_form', product_id=existing_product.id) }}{% else %}{{ url_for('products.product_form') }}{% endif %}" method="POST" enctype="multipart/form-data">
                     {% if existing_product and is_editing %}
                     <input type="hidden" name="_method" value="PUT">
                     <input type="hidden" name="product_id" value="{{ existing_product.id }}">
@@ -567,7 +567,8 @@
                                     Product Name <span class="required">*</span>
                                 </label>
                                 <input type="text" class="form-control" id="productName" name="product_name" 
-                                       placeholder="Enter product name" minlength="3" maxlength="100" required>
+                                       placeholder="Enter product name" minlength="3" maxlength="100" 
+                                       value="{% if existing_product %}{{ existing_product.product_name }}{% endif %}" required>
                                 <div class="error-message" id="nameError" style="display: none;">
                                     <i class="fas fa-exclamation-circle"></i>
                                     <span></span>
@@ -582,7 +583,8 @@
                                 </label>
                                 <div class="price-input">
                                     <input type="number" class="form-control" id="productPrice" name="price" 
-                                           placeholder="0.00" min="0.01" step="0.01" required>
+                                           placeholder="0.00" min="0.01" step="0.01" 
+                                           value="{% if existing_product %}{{ existing_product.price }}{% endif %}" required>
                                 </div>
                                 <div class="error-message" id="priceError" style="display: none;">
                                     <i class="fas fa-exclamation-circle"></i>
@@ -627,9 +629,9 @@
                                 </label>
                                 <select class="form-control" id="categoryId" name="category_id" required>
                                     {% if categories and categories|length > 0 %}
-                                        <option value="" disabled selected>Select a category</option>
+                                        <option value="" disabled {% if not existing_product %}selected{% endif %}>Select a category</option>
                                         {% for category in categories %}
-                                            <option value="{{ category.id }}">{{ category.name }}</option>
+                                            <option value="{{ category.id }}" {% if existing_product and existing_product.category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
                                         {% endfor %}
                                     {% else %}
                                         <option value="" disabled>No categories available</option>
@@ -643,7 +645,7 @@
                                     Stock Quantity
                                 </label>
                                 <input type="number" class="form-control" id="stockQuantity" name="stock_quantity" 
-                                       placeholder="10" min="0" value="10">
+                                       placeholder="10" min="0" value="{% if existing_product %}{{ existing_product.stock_quantity }}{% else %}10{% endif %}">
                             </div>
                         </div>
                         
@@ -654,7 +656,7 @@
                                     Minimum Stock Level
                                 </label>
                                 <input type="number" class="form-control" id="minStockLevel" name="min_stock_level" 
-                                       placeholder="5" min="0" value="5">
+                                       placeholder="5" min="0" value="{% if existing_product %}{{ existing_product.min_stock_level }}{% else %}5{% endif %}">
                             </div>
                             
                             <div class="form-group">
@@ -668,7 +670,7 @@
                                 Description <span class="required">*</span>
                             </label>
                             <textarea class="form-control textarea-control" id="productDescription" name="description" 
-                                      placeholder="Describe your product in detail..." minlength="10" maxlength="1000" required></textarea>
+                                      placeholder="Describe your product in detail..." minlength="10" maxlength="1000" required>{% if existing_product %}{{ existing_product.description }}{% endif %}</textarea>
                             <div class="error-message" id="descriptionError" style="display: none;">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <span></span>
@@ -680,12 +682,16 @@
                     <input type="hidden" name="customer_id" value="{{ user.id }}">
                     
                     <div class="form-actions">
-                        <a href="{{ url_for('customer_profile') }}" class="btn btn-secondary">
+                        <a href="{{ url_for('profile.customer_profile') }}" class="btn btn-secondary">
                             <i class="fas fa-times"></i> Cancel
                         </a>
                         <button type="submit" class="btn btn-primary" id="submitBtn">
                             <span class="btn-text">
-                                <i class="fas fa-plus"></i> Add Product
+                                {% if existing_product %}
+                                    <i class="fas fa-edit"></i> Update Product
+                                {% else %}
+                                    <i class="fas fa-plus"></i> Add Product
+                                {% endif %}
                             </span>
                             <div class="loading-spinner" id="loadingSpinner"></div>
                         </button>
@@ -702,6 +708,31 @@
             const submitBtn = document.getElementById('submitBtn');
             const loadingSpinner = document.getElementById('loadingSpinner');
             const btnText = submitBtn.querySelector('.btn-text');
+            
+            // Form fields
+            const productName = document.getElementById('productName');
+            const productPrice = document.getElementById('productPrice');
+            const productImage = document.getElementById('productImage');
+            const productDescription = document.getElementById('productDescription');
+            
+            // Progress bar function
+            function updateProgress() {
+                let progress = 0;
+                const fields = [productName, productPrice, productDescription];
+                
+                fields.forEach(field => {
+                    if (field.value.trim() !== '' && !field.classList.contains('error')) {
+                        progress += 25;
+                    }
+                });
+                
+                // Check if image is uploaded
+                if (productImage.files.length > 0) {
+                    progress += 25;
+                }
+                
+                progressBar.style.width = progress + '%';
+            }
             
             // Check if we're editing an existing product
             {% if existing_product and is_editing %}
@@ -751,12 +782,6 @@
                 updateProgress();
             }
             {% endif %}
-            
-            // Form fields
-            const productName = document.getElementById('productName');
-            const productPrice = document.getElementById('productPrice');
-            const productImage = document.getElementById('productImage');
-            const productDescription = document.getElementById('productDescription');
             
             // File upload elements
             const fileUploadContainer = document.getElementById('fileUploadContainer');
@@ -901,24 +926,6 @@
                 }
             }
             
-            function updateProgress() {
-                let progress = 0;
-                const fields = [productName, productPrice, productDescription];
-                
-                fields.forEach(field => {
-                    if (field.value.trim() !== '' && !field.classList.contains('error')) {
-                        progress += 25;
-                    }
-                });
-                
-                // Check if image is uploaded
-                if (productImage.files.length > 0) {
-                    progress += 25;
-                }
-                
-                progressBar.style.width = progress + '%';
-            }
-            
             // Form submission
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -947,8 +954,7 @@
                     
                     // Check if we're editing or creating
                     {% if existing_product and is_editing %}
-                    // Update form action for editing
-                    form.action = "{{ url_for('product_form', edit=existing_product.id) }}";
+                    // Form action is already set correctly in the template
                     
                     // Simulate form submission delay
                     setTimeout(() => {

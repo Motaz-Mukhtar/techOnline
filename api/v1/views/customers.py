@@ -67,7 +67,35 @@ def modify_customer(customer_id):
 
         return make_response(jsonify({}), 200)
 
-# /customer/products
+@app_views.route('/customers/<customer_id>/products', methods=['GET'], strict_slashes=False)
+@require_auth(['read'])
+def get_customer_products(customer_id):
+    """
+    Get all products owned by a specific customer.
+    
+    Args:
+        customer_id (str): ID of the customer whose products to retrieve
+        
+    Returns:
+        JSON response with customer's products or error message
+    """
+    customer = storage.get(Customer, customer_id)
+    if not customer:
+        return make_response(jsonify({"error": "Customer not found"}), 404)
+    
+    # Check if user can access this customer's data
+    current_user_id = get_current_user_id()
+    if not is_admin() and customer_id != current_user_id:
+        return make_response(jsonify({"error": "Access denied: You can only access your own products"}), 403)
+    
+    # Get customer's products using the products property
+    products = customer.products
+    
+    return make_response(jsonify({
+        "products": products,
+        "total": len(products),
+        "message": "Customer products retrieved successfully"
+    }), 200)
 
 
 

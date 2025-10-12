@@ -232,6 +232,18 @@ class APIErrorHandler:
             status_code=self.HTTP_403_FORBIDDEN
         )
     
+    def access_denied_error_response(self, message: str = 'Access denied') -> tuple:
+        """
+        Create an access denied error response (alias for authorization_error_response).
+        
+        Args:
+            message (str): Access denied error message
+        
+        Returns:
+            tuple: (response_dict, status_code)
+        """
+        return self.authorization_error_response(message)
+    
     def file_upload_error_response(self, message: str, 
                                   file_errors: Optional[List[str]] = None) -> tuple:
         """

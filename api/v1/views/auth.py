@@ -597,3 +597,38 @@ def api_logout():
             message="Logout failed",
             error_details=str(e)
         )
+
+
+@app_views.route('/auth/session-token', methods=['GET'], strict_slashes=False)
+def get_session_token():
+    """
+    Get JWT token from Flask session.
+    
+    This endpoint retrieves the JWT token stored in the Flask session
+    during login, allowing frontend JavaScript to access it for localStorage storage.
+    
+    Returns:
+        JSON response with token if available in session
+    """
+    try:
+        from flask import session
+        
+        # Get token from Flask session
+        access_token = session.get('access_token')
+        
+        if access_token:
+            return error_handler.success_response(
+                data={"token": access_token},
+                message="Token retrieved successfully"
+            )
+        else:
+            return error_handler.client_error_response(
+                message="No token found in session. Please log in.",
+                status_code=401
+            )
+            
+    except Exception as e:
+        return error_handler.system_error_response(
+            message="Failed to retrieve session token",
+            error_details=str(e)
+        )

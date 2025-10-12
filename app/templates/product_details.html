@@ -29,7 +29,7 @@
             <div class="flex items-center gap-4 ml-auto">
                 <!-- Cart Icon with Badge -->
                 <div class="relative">
-                    <a href="{{ url_for('cart') }}" class="flex items-center justify-center w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full transition-all duration-300 ease-in-out hover:scale-105">
+                    <a href="{{ url_for('cart.cart') }}" class="flex items-center justify-center w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full transition-all duration-300 ease-in-out hover:scale-105">
                         <i class="fas fa-shopping-cart text-lg"></i>
                     </a>
                     <span id="cartBadge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center min-w-[20px] px-1">{{cart_item_count}}</span>
@@ -43,9 +43,9 @@
                         <i class="fas fa-chevron-down text-sm"></i>
                     </button>
                     <div id="headerDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-52 bg-white text-black rounded-xl shadow-xl overflow-hidden">
-                        <a href="{{ url_for('customer_profile') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-user mr-2"></i> Profile</a>
-                        <a href="{{ url_for('shop') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-store mr-2"></i> Shop</a>
-                        <a href="{{ url_for('product_form') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-plus mr-2"></i> Add Product</a>
+                        <a href="{{ url_for('profile.customer_profile') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-user mr-2"></i> Profile</a>
+                        <a href="{{ url_for('shop.shop') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-store mr-2"></i> Shop</a>
+                        <a href="{{ url_for('products.product_form') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-plus mr-2"></i> Add Product</a>
                         <a href="{{ url_for('logout') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
                     </div>
                 </div>
@@ -82,7 +82,7 @@
 
                     <div class="flex gap-2">
                         <button id="addToCartBtn" class="bg-accent-orange text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out hover:bg-yellow-600 hover:-translate-y-0.5"><i class="fas fa-cart-plus"></i> Add to Cart</button>
-                        <a href="{{ url_for('shop') }}" class="bg-primary-blue text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out hover:bg-secondary-blue hover:-translate-y-0.5 no-underline"><i class="fas fa-arrow-left"></i> Back to Shop</a>
+                        <a href="{{ url_for('shop.shop') }}" class="bg-primary-blue text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out hover:bg-secondary-blue hover:-translate-y-0.5 no-underline"><i class="fas fa-arrow-left"></i> Back to Shop</a>
                     </div>
 
                     <div class="mt-8">

@@ -108,7 +108,7 @@
         <div class="max-w-6xl mx-auto px-8 flex justify-between items-center flex-wrap gap-4">
             <h1 class="text-4xl font-black m-0 cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105">tech<span class="text-accent-orange">O</span>nline</h1>
             
-            <form class="flex gap-2 flex-1 max-w-lg mx-8" method="post" action="{{ url_for('shop') }}">
+            <form class="flex gap-2 flex-1 max-w-lg mx-8" method="post" action="{{ url_for('shop.shop') }}">
                 <input type="search" 
                        name="product_name" 
                        class="flex-1 px-4 py-3 border-0 rounded-full text-base outline-none shadow-md" 
@@ -122,7 +122,7 @@
             <div class="flex items-center gap-4 ml-auto">
                 <!-- Cart Icon with Badge -->
                 <div class="relative">
-                    <a href="{{ url_for('cart') }}" class="flex items-center justify-center w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full transition-all duration-300 ease-in-out hover:scale-105">
+                    <a href="{{ url_for('cart.cart') }}" class="flex items-center justify-center w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full transition-all duration-300 ease-in-out hover:scale-105">
                         <i class="fas fa-shopping-cart text-lg"></i>
                     </a>
                     <span id="cartBadge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center min-w-[20px] px-1">{{ cart_item_count }}</span>
@@ -136,9 +136,9 @@
                         <i class="fas fa-chevron-down text-sm"></i>
                     </button>
                     <div id="headerDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-52 bg-white text-black rounded-xl shadow-xl overflow-hidden">
-                        <a href="{{ url_for('customer_profile') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-user mr-2"></i> Profile</a>
-                        <a href="{{ url_for('shop') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-store mr-2"></i> Shop</a>
-                        <a href="{{ url_for('product_form') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-plus mr-2"></i> Add Product</a>
+                        <a href="{{ url_for('profile.customer_profile') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-user mr-2"></i> Profile</a>
+                        <a href="{{ url_for('shop.shop') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-store mr-2"></i> Shop</a>
+                        <a href="{{ url_for('products.product_form') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-plus mr-2"></i> Add Product</a>
                         <a href="{{ url_for('logout') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
                     </div>
                 </div>
@@ -212,7 +212,7 @@
             <h3>No Products Found</h3>
             {% if search_query %}
             <p>No products match your search for "{{ search_query }}". Try different keywords.</p>
-            <a href="{{ url_for('shop') }}" class="bg-primary-blue text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out hover:bg-secondary-blue hover:-translate-y-0.5 inline-block mt-4 no-underline">View All Products</a>
+            <a href="{{ url_for('shop.shop') }}" class="bg-primary-blue text-white border-0 px-4 py-3 rounded-lg cursor-pointer font-semibold transition-all duration-300 ease-in-out hover:bg-secondary-blue hover:-translate-y-0.5 inline-block mt-4 no-underline">View All Products</a>
             {% else %}
             <p>No products are currently available. Check back later!</p>
             {% endif %}
@@ -249,7 +249,7 @@
 
         function viewProduct(productId) {
             // Navigate to product details page using Flask url_for for scalability
-            window.location.href = "{{ url_for('product_details', product_id='PRODUCT_ID') }}".replace('PRODUCT_ID', productId);
+            window.location.href = "/product/" + productId;
         }
         
         // Function to get JWT token from session

@@ -59,7 +59,7 @@ def login():
                 # Get JWT token from API
                 try:
                     import requests
-                    api_url = 'http://127.0.0.1:5000/api/v1/auth/login'
+                    api_url = 'http://127.0.0.1:5001/api/v1/auth/login'
                     api_data = {
                         'email': user_email,
                         'password': user_pass
@@ -76,7 +76,7 @@ def login():
                 except Exception as e:
                     flash(f'Warning: API connection failed: {str(e)}', 'warning')
                 
-                return redirect(url_for('shop'))
+                return redirect(url_for('shop.shop'))
 
         flash(f'Wrong Email or Password', 'error')
         return redirect(url_for('login'))

@@ -4,9 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TechOnline | My Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#0576d3',
+                        'secondary-blue': '#1e40af',
+                        'accent-orange': '#f59e0b',
+                        'neutral-gray': '#6b7280',
+                        'background': '#f8fafc'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         body {
             background: var(--background);
@@ -87,10 +103,10 @@
         
         .main-container {
             max-width: 1200px;
-            margin: 0 auto 0; /* remove negative overlap since header is gone */
+            margin: 10rem auto 0;
             padding: 0 2rem 2rem;
             position: relative;
-            z-index: 2;
+            z-index: 1;
         }
         
         .profile-card {
@@ -101,16 +117,84 @@
             margin-bottom: 2rem;
         }
         
-        .profile-info {
-            padding: 2rem;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: 2rem;
-            align-items: center;
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            background: var(--white);
+            border-bottom: 1px solid #e0e0e0;
+            overflow-x: auto;
         }
         
-        .profile-avatar {
+        .tab-button {
+            flex: 1;
+            padding: 1.5rem 2rem;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
             position: relative;
+            min-width: 150px;
+        }
+        
+        .tab-button:hover {
+            background: #f8f9fa;
+            color: var(--primary-blue);
+        }
+        
+        .tab-button.active {
+            color: var(--primary-blue);
+            background: #f8f9fa;
+        }
+        
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-blue);
+        }
+        
+        .tab-button i {
+            margin-right: 0.5rem;
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Info Section Styles */
+        .info-section {
+            display: grid;
+            gap: 2rem;
+        }
+        
+        .profile-info-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .profile-avatar-section {
+            text-align: center;
+            margin-bottom: 2rem;
         }
         
         .avatar-container {
@@ -119,6 +203,7 @@
             border-radius: 50%;
             overflow: hidden;
             border: 4px solid var(--primary-blue);
+            margin: 0 auto 1rem;
             position: relative;
             cursor: pointer;
             transition: transform 0.3s ease;
@@ -152,64 +237,53 @@
         }
         
         .avatar-upload:hover {
-            background: var(--secondary-blue);
+            background: #e67e22;
         }
         
-        .profile-details h2 {
-            color: var(--black);
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin: 0 0 0.5rem 0;
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
         }
         
-        .profile-details p {
-            color: var(--neutral-gray);
-            margin: 0 0 1rem 0;
-            font-size: 1.1rem;
+        .form-group {
+            margin-bottom: 1.5rem;
         }
         
-        .profile-stats {
-            display: flex;
-            gap: 2rem;
-            margin-top: 1rem;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-number {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-blue);
+        .form-group label {
             display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
         }
         
-        .stat-label {
-            font-size: 0.9rem;
-            color: var(--neutral-gray);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
         }
         
-        .profile-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
         }
         
         .btn {
             padding: 0.75rem 1.5rem;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-            text-align: center;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 0.5rem;
         }
         
@@ -221,497 +295,523 @@
         .btn-primary:hover {
             background: var(--secondary-blue);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(5, 118, 211, 0.3);
-        }
-        
-        .btn-secondary {
-            background: var(--background);
-            color: var(--neutral-gray);
-            border: 2px solid var(--background);
-        }
-        
-        .btn-secondary:hover {
-            background: var(--white);
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
-        }
-        
-        .btn-success {
-            background: var(--success-green);
-            color: var(--white);
-        }
-        
-        .btn-success:hover {
-            background: #0d9668;
-            transform: translateY(-2px);
         }
         
         .btn-danger {
-            background: var(--error-red);
+            background: #dc3545;
             color: var(--white);
         }
         
         .btn-danger:hover {
-            background: #dc2626;
+            background: #c82333;
             transform: translateY(-2px);
         }
         
-        .edit-form {
+        .danger-zone {
+            background: #fff5f5;
+            border: 2px solid #fed7d7;
+            border-radius: 15px;
             padding: 2rem;
-            background: var(--background);
-            display: none;
+            margin-top: 2rem;
         }
         
-        .form-grid {
+        .danger-zone h3 {
+            color: #e53e3e;
+            margin-bottom: 1rem;
+        }
+        
+        .danger-zone p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Orders Section Styles */
+        .orders-section {
             display: grid;
-            grid-template-columns: 1fr 1fr;
             gap: 1.5rem;
-            margin-bottom: 2rem;
         }
         
-        .form-group {
-            display: flex;
-            flex-direction: column;
+        .order-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid #e0e0e0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         
-        .form-group.full-width {
-            grid-column: 1 / -1;
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
         
-        .form-label {
-            color: var(--neutral-gray);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .form-control {
-            padding: 1rem;
-            border: 2px solid var(--background);
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: var(--white);
-            color: var(--black);
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(5, 118, 211, 0.1);
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-        }
-        
-        .products-section {
-            background: var(--white);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        
-        .section-header {
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-            color: var(--white);
-            padding: 1.5rem 2rem;
+        .order-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
         
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin: 0;
+        .order-id {
+            font-weight: 700;
+            color: var(--primary-blue);
+            font-size: 1.1rem;
         }
         
-        .add-product-btn {
-            background: var(--accent-orange);
-            color: var(--white);
-            border: none;
+        .order-status {
             padding: 0.5rem 1rem;
-            border-radius: 8px;
+            border-radius: 20px;
+            font-size: 0.9rem;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            text-transform: uppercase;
         }
         
-        .add-product-btn:hover {
-            background: #d97706;
-            transform: translateY(-1px);
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
         }
         
-        .products-grid {
-            padding: 2rem;
+        .status-confirmed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-shipped {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .status-delivered {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .order-products {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .product-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--white);
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .product-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        
+        .product-details {
+            flex: 1;
+        }
+        
+        .product-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+        
+        .product-price {
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+        
+        .product-quantity {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Wishlist Section Styles */
+        .wishlist-section {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.5rem;
         }
         
-        .product-card {
-            background: var(--background);
+        .wishlist-item {
+            background: #f8f9fa;
             border-radius: 15px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
+            padding: 1.5rem;
+            border: 1px solid #e0e0e0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
         }
         
-        .product-card:hover {
+        .wishlist-item:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border-color: var(--primary-blue);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        
+        .wishlist-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .wishlist-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .wishlist-price {
+            color: var(--primary-blue);
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .wishlist-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        
+        /* Products Section Styles */
+        .products-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .product-item {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid #e0e0e0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .product-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
         }
         
         .product-image {
             width: 100%;
             height: 200px;
             object-fit: cover;
-            background: var(--white);
-        }
-        
-        .product-info {
-            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
         }
         
         .product-name {
-            font-size: 1.2rem;
             font-weight: 600;
-            color: var(--black);
-            margin: 0 0 0.5rem 0;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
         }
         
         .product-price {
-            font-size: 1.1rem;
-            font-weight: 700;
             color: var(--primary-blue);
-            margin: 0 0 1rem 0;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
         
         .product-actions {
             display: flex;
             gap: 0.5rem;
+            justify-content: center;
         }
         
         .btn-sm {
             padding: 0.5rem 1rem;
             font-size: 0.9rem;
-            flex: 1;
         }
         
         .empty-state {
             text-align: center;
-            padding: 3rem 2rem;
-            color: var(--neutral-gray);
+            padding: 3rem;
+            color: #666;
         }
         
-        .empty-icon {
+        .empty-state i {
             font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-        
-        .empty-message {
-            font-size: 1.2rem;
+            color: #ddd;
             margin-bottom: 1rem;
         }
         
-        .empty-description {
-            margin-bottom: 2rem;
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+            color: #333;
         }
         
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .profile-info {
-                grid-template-columns: 1fr;
-                text-align: center;
-                gap: 1.5rem;
+            .main-container {
+                padding: 0 1rem 1rem;
+                margin-top: -1rem;
             }
             
-            .profile-stats {
-                justify-content: center;
+            .tab-button {
+                padding: 1rem;
+                font-size: 1rem;
+                min-width: 120px;
+            }
+            
+            .tab-content {
+                padding: 1.5rem;
             }
             
             .form-grid {
                 grid-template-columns: 1fr;
             }
             
-            .nav-links {
-                display: none;
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
             }
             
+            .product-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .wishlist-section {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+        
+        @media (max-width: 480px) {
             .profile-title {
                 font-size: 2rem;
             }
             
-            .main-container {
-                padding: 0 1rem 2rem;
+            .tab-navigation {
+                flex-direction: column;
             }
-        }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 10px;
-            color: var(--white);
-            font-weight: 600;
-            z-index: 1000;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-        }
-        
-        .notification.show {
-            transform: translateX(0);
-        }
-        
-        .notification.success {
-            background: var(--success-green);
-        }
-        
-        .notification.error {
-            background: var(--error-red);
-        }
-        /* Simplify profile page: remove collapsible edit UI */
-        .edit-form { display: none !important; }
-        #editBtn, #cancelBtn { display: none !important; }
-        /* Align header look with /shop: hide page title and extra actions */
-        .profile-title { display: none !important; }
-        .profile-actions { display: none !important; }
-        /* Top bar back button */
-        .top-bar {
-            padding: 1rem 2rem;
-            position: sticky; /* keep visible on small screens */
-            top: 0;
-            z-index: 1000;
-            background: var(--background);
-        }
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--background);
-            color: var(--black);
-            border: 2px solid var(--primary-blue);
-            border-radius: 10px;
-            padding: 0.5rem 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-        .back-btn:hover {
-            background: var(--primary-blue);
-            color: var(--white);
-            transform: translateY(-1px);
-        }
-        /* Ensure visibility on small screens */
-        @media (max-width: 768px) {
-            .top-bar {
-                padding: 0.75rem 1rem;
+            
+            .tab-button {
+                min-width: auto;
+                text-align: left;
             }
-            .back-btn {
-                font-size: 0.95rem;
-                padding: 0.5rem 0.75rem;
+            
+            .wishlist-section {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="top-bar">
-        <button class="back-btn" onclick="window.history.back()">
-            <i class="fas fa-arrow-left"></i> Previous Page
-        </button>
-    </div>
-    
+    <!-- Profile Header -->
+    <header class="bg-gradient-to-br from-primary-blue to-secondary-blue text-white py-4 shadow-lg" style="display: block; overflow: visible;">
+        <div class="max-w-6xl mx-auto px-8 flex justify-between items-center flex-wrap gap-4">
+            <h1 class="text-4xl font-black m-0 cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105">tech<span class="text-accent-orange">O</span>nline</h1>
+            <div class="flex items-center gap-4 ml-auto">
+                <!-- Cart Icon with Badge -->
+                <div class="relative">
+                    <a href="{{ url_for('cart.cart') }}" class="flex items-center justify-center w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 text-black rounded-full transition-all duration-300 ease-in-out hover:scale-105">
+                        <i class="fas fa-shopping-cart text-lg"></i>
+                    </a>
+                    <span id="cartBadge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center min-w-[20px] px-1">{{cart_item_count}}</span>
+                </div>
+                
+                <!-- Menu Dropdown -->
+                <div class="relative z-[9999]">
+                    <button id="headerDropdownBtn" class="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-black px-4 py-2 rounded-2xl font-medium transition-all duration-300 ease-in-out">
+                        <i class="fas fa-bars text-black"></i>
+                        Menu
+                        <i class="fas fa-chevron-down text-sm text-black"></i>
+                    </button>
+                    <div id="headerDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-52 bg-white text-black rounded-xl shadow-xl overflow-hidden z-[9999]">
+                        <a href="{{ url_for('profile.customer_profile') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-user mr-2 text-black"></i> Profile</a>
+                        <a href="{{ url_for('shop.shop') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-store mr-2 text-black"></i> Shop</a>
+                        <a href="{{ url_for('products.product_form') }}" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-plus mr-2 text-black"></i> Add Product</a>
+                        <a href="#" onclick="logout()" class="block px-4 py-3 hover:bg-background no-underline text-black"><i class="fas fa-sign-out-alt mr-2 text-black"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Main Container -->
     <div class="main-container">
         <div class="profile-card">
-            <div class="profile-info" id="profileInfo">
-                <div class="profile-avatar">
-                    <div class="avatar-container">
-                        <img src="{{ url_for('static', filename='images/hFna7--L_400x400.jpg') }}" alt="Profile Avatar" id="avatarImage">
-                        <button class="avatar-upload" onclick="document.getElementById('avatarInput').click()">
-                            <i class="fas fa-camera"></i>
-                        </button>
-                        <input type="file" id="avatarInput" accept="image/*" style="display: none;">
-                    </div>
-                </div>
-                
-                <div class="profile-details">
-                    <h2 id="displayName">{{ user.to_dict().first_name }} {{ user.to_dict().last_name }}</h2>
-                    <p id="displayEmail"><i class="fas fa-envelope"></i> {{ user.to_dict().email }}</p>
-                    <div class="profile-stats">
-                        <div class="stat-item">
-                            <span class="stat-number">{{ user.products|length }}</span>
-                            <span class="stat-label">Products</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">{{ average_rating }}</span>
-                            <span class="stat-label">Rating</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">{{ total_sales }}</span>
-                            <span class="stat-label">Sales</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="profile-actions">
-                    <button class="btn btn-primary" id="editBtn">
-                        <i class="fas fa-edit"></i> Edit Profile
-                    </button>
-                    <a href="{{ url_for('product_form') }}" class="btn btn-secondary">
-                        <i class="fas fa-plus"></i> Add Product
-                    </a>
-                </div>
-            </div>
-            
-            <div class="edit-form" id="editForm">
-                <form id="profileForm" data-id="{{ user.to_dict().id }}">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label" for="firstName">First Name</label>
-                            <input type="text" class="form-control" id="firstName" name="first_name" value="{{ user.to_dict().first_name }}" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="lastName">Last Name</label>
-                            <input type="text" class="form-control" id="lastName" name="last_name" value="{{ user.to_dict().last_name }}" required>
-                        </div>
-                        <div class="form-group full-width">
-                            <label class="form-label" for="email">Email Address</label>
-                            <input type="email" class="form-control" id="email" name="email" value="{{ user.to_dict().email }}" required>
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" id="cancelBtn">
-                            <i class="fas fa-times"></i> Cancel
-                        </button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save"></i> Save Changes
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        
-        <div class="products-section">
-            <div class="section-header">
-                <h2 class="section-title">My Products</h2>
-                <button class="add-product-btn" onclick="window.location.href='{{ url_for('product_form') }}'">
-                    <i class="fas fa-plus"></i> Add New Product
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-button active" onclick="switchTab('info')">
+                    <i class="fas fa-user"></i> Info
+                </button>
+                <button class="tab-button" onclick="switchTab('orders')">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </button>
+                <button class="tab-button" onclick="switchTab('wishlist')">
+                    <i class="fas fa-heart"></i> Wishlist
+                </button>
+                <button class="tab-button" onclick="switchTab('products')">
+                    <i class="fas fa-box"></i> My Products
                 </button>
             </div>
-            
-            {% if user.products %}
-            <div class="products-grid">
-                {% for product in user.products %}
-                <div class="product-card">
-                    {% if product.product_image.startswith('/static/') %}
-                                <img src="http://localhost:5001{{ product.product_image }}" alt="{{ product.product_name }}" class="product-image">
-                                {% else %}
-                                <img src="{{ product.product_image }}" alt="{{ product.product_name }}" class="product-image">
-                                {% endif %}
-                    <div class="product-info">
-                        <h3 class="product-name">{{ product.product_name }}</h3>
-                        <p class="product-price">${{ "%.2f"|format(product.price|float) }}</p>
-                        <div class="product-actions">
-                            <button class="btn btn-primary btn-sm" onclick="editProduct('{{ product.id }}')">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteProduct('{{ product.id }}', '{{ access_token }}', event)">
-                                            <i class="fas fa-trash"></i> Delete
-                                        </button>
+
+            <!-- Info Tab Content -->
+            <div id="info-tab" class="tab-content active">
+                <div class="info-section">
+                    <div class="profile-info-card">
+                        <div class="profile-avatar-section">
+                            <div class="avatar-container" onclick="document.getElementById('avatar-input').click()">
+                                <img id="profile-avatar" src="{{ user.profile_avatar or '/static/images/default-avatar.png' }}" alt="Profile Avatar">
+                                <button class="avatar-upload">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                            </div>
+                            <input type="file" id="avatar-input" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
+                            <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+                            <p class="text-muted">{{ user.email }}</p>
                         </div>
+
+                        <form id="profile-form" onsubmit="updateProfile(event)">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="first_name">First Name</label>
+                                    <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="last_name">Last Name</label>
+                                    <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="address">Address</label>
+                                    <textarea id="address" name="address" rows="3" placeholder="Enter your address">{{ user.address or '' }}</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Update Profile
+                                </button>
+                            </div>
+                        </form>
+
+                        <hr style="margin: 2rem 0;">
+
+                        <form id="password-form" onsubmit="changePassword(event)">
+                            <h4>Change Password</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="current_password">Current Password</label>
+                                    <input type="password" id="current_password" name="current_password" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_password">New Password</label>
+                                    <input type="password" id="new_password" name="new_password" required minlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirm_password">Confirm New Password</label>
+                                    <input type="password" id="confirm_password" name="confirm_password" required minlength="6">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-key"></i> Change Password
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Danger Zone -->
+                    <div class="danger-zone">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+                        <p>Once you delete your account, there is no going back. All data linked with this account will be permanently deleted.</p>
+                        <button class="btn btn-danger" onclick="confirmDeleteAccount()">
+                            <i class="fas fa-trash"></i> Delete Account
+                        </button>
                     </div>
                 </div>
-                {% endfor %}
             </div>
-            {% else %}
-            <div class="empty-state">
-                <div class="empty-icon">
-                    <i class="fas fa-box-open"></i>
+
+            <!-- Orders Tab Content -->
+            <div id="orders-tab" class="tab-content">
+                <div class="loading" id="orders-loading">
+                    <div class="spinner"></div>
                 </div>
-                <h3 class="empty-message">No Products Yet</h3>
-                <p class="empty-description">Start selling by adding your first product to the marketplace.</p>
-                <button class="btn btn-primary" onclick="window.location.href='{{ url_for('product_form') }}'">
-                    <i class="fas fa-plus"></i> Add Your First Product
-                </button>
+                <div id="orders-content" style="display: none;">
+                    <div class="orders-section" id="orders-list">
+                        <!-- Orders will be loaded here -->
+                    </div>
+                </div>
             </div>
-            {% endif %}
+
+            <!-- Wishlist Tab Content -->
+            <div id="wishlist-tab" class="tab-content">
+                <div class="loading" id="wishlist-loading">
+                    <div class="spinner"></div>
+                </div>
+                <div id="wishlist-content" style="display: none;">
+                    <div class="wishlist-section" id="wishlist-list">
+                        <!-- Wishlist items will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Products Tab Content -->
+            <div id="products-tab" class="tab-content">
+                <div class="loading" id="products-loading">
+                    <div class="spinner"></div>
+                </div>
+                <div id="products-content" style="display: none;">
+                    <div class="products-section" id="products-list">
+                        <!-- User products will be loaded here -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const editBtn = document.getElementById('editBtn');
-            const cancelBtn = document.getElementById('cancelBtn');
-            const profileInfo = document.getElementById('profileInfo');
-            const editForm = document.getElementById('editForm');
-            const profileForm = document.getElementById('profileForm');
-            const avatarInput = document.getElementById('avatarInput');
-            const avatarImage = document.getElementById('avatarImage');
-            
-            // Edit profile functionality
-            editBtn.addEventListener('click', function() {
-                profileInfo.style.display = 'none';
-                editForm.style.display = 'block';
-            });
-            
-            cancelBtn.addEventListener('click', function() {
-                profileInfo.style.display = 'grid';
-                editForm.style.display = 'none';
-                // Reset form values
-                profileForm.reset();
-            });
-            
-            // Avatar upload functionality
-            avatarInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        avatarImage.src = e.target.result;
-                        showNotification('Avatar updated successfully!', 'success');
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-            
-            // Form submission
-            profileForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const formData = new FormData(this);
-                const userId = this.dataset.id;
-                
-                // Simulate API call
-                setTimeout(() => {
-                    // Update display values
-                    const firstName = formData.get('first_name');
-                    const lastName = formData.get('last_name');
-                    const email = formData.get('email');
-                    
-                    document.getElementById('displayName').textContent = `${firstName} ${lastName}`;
-                    document.getElementById('displayEmail').innerHTML = `<i class="fas fa-envelope"></i> ${email}`;
-                    
-                    // Switch back to view mode
-                    profileInfo.style.display = 'grid';
-                    editForm.style.display = 'none';
-                    
-                    showNotification('Profile updated successfully!', 'success');
-                }, 500);
-            });
-        });
-        
-        // Dropdown toggle for profile header
+        // Dropdown toggle
         (function() {
-            const btn = document.getElementById('profileDropdownBtn');
-            const menu = document.getElementById('profileDropdownMenu');
+            const btn = document.getElementById('headerDropdownBtn');
+            const menu = document.getElementById('headerDropdownMenu');
             if (btn && menu) {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -723,139 +823,723 @@
             }
         })();
 
-        function editProduct(productId) {
-            // Redirect to product edit page (placeholder)
-            window.location.href = `/shop/product_form?edit=${productId}`;
-        }
-        
-        async function deleteProduct(productId, accessToken, event) {
-            if (await confirm('Are you sure you want to delete this product?')) {
-                // Show loading state
-                showNotification('Deleting product...', 'info');
-                
-                // Debug: Check if access token is available
-                console.log('Access Token:', accessToken);
-                
-                // If no access token passed, try to get it from the API
-                if (!accessToken || accessToken === 'None' || accessToken === '') {
-                    try {
-                        const tokenResponse = await fetch('/api/token');
-                        console.log('Token response status:', tokenResponse.status);
-                        console.log('Token response headers:', tokenResponse.headers.get('content-type'));
-                        
-                        // Check if response is JSON (authenticated) or HTML (redirected to login)
-                        const contentType = tokenResponse.headers.get('content-type');
-                        if (contentType && contentType.includes('text/html')) {
-                            // User is not logged in, redirect to login
-                            showNotification('Session expired. Please log in again.', 'error');
-                            setTimeout(() => {
-                                window.location.href = '/login';
-                            }, 2000);
-                            return;
-                        }
-                        
-                        if (tokenResponse.ok) {
-                            const tokenData = await tokenResponse.json();
-                            if (tokenData.success) {
-                                accessToken = tokenData.access_token;
-                                console.log('Retrieved token from API:', accessToken);
-                            } else {
-                                showNotification('No valid session found. Please log in again.', 'error');
-                                setTimeout(() => {
-                                    window.location.href = '/login';
-                                }, 2000);
-                                return;
-                            }
-                        } else {
-                            showNotification('Authentication failed. Please log in again.', 'error');
-                            setTimeout(() => {
-                                window.location.href = '/login';
-                            }, 2000);
-                            return;
-                        }
-                    } catch (error) {
-                        console.error('Error getting token:', error);
-                        showNotification('Authentication error. Please log in again.', 'error');
-                        setTimeout(() => {
-                            window.location.href = '/login';
-                        }, 2000);
-                        return;
-                    }
-                }
-                
-                // Make API call with authentication
-                const headers = {
-                    'Content-Type': 'application/json'
-                };
-                
-                if (accessToken && accessToken !== 'None' && accessToken !== '') {
-                    headers['Authorization'] = `Bearer ${accessToken}`;
-                } else {
-                    showNotification('Authentication required. Please log in again.', 'error');
-                    setTimeout(() => {
-                        window.location.href = '/login';
-                    }, 2000);
-                    return;
-                }
-
-                fetch(`http://localhost:5001/api/v1/products/${productId}`, {
-                    method: 'DELETE',
-                    headers: headers
-                })
-                .then(response => {
-                    if (response.ok) {
-                        // Remove product card from DOM
-                        const productCard = event ? event.target.closest('.product-card') : document.querySelector(`[data-product-id="${productId}"]`);
-                        if (productCard) {
-                            productCard.remove();
-                        }
-                        showNotification('Product deleted successfully!', 'success');
-                        
-                        // Reload page after a short delay to refresh product count
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        response.json().then(data => {
-                            console.error(data);
-                            const errorMessage = data.message || 'Failed to delete product. Please try again.';
-                            showNotification(errorMessage, 'error');
-                        }).catch(() => {
-                            showNotification('Failed to delete product. Please try again.', 'error');
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Delete error:', error);
-                    showNotification('An error occurred. Please try again.', 'error');
-                });
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Remove active class from all tabs and buttons
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Add active class to selected tab and button
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+            
+            // Load content based on tab
+            if (tabName === 'orders') {
+                loadOrders();
+            } else if (tabName === 'wishlist') {
+                loadWishlist();
+            } else if (tabName === 'products') {
+                loadProducts();
             }
         }
-        function showNotification(message, type) {
-            // Remove existing notifications
-            const existingNotifications = document.querySelectorAll('.notification');
-            existingNotifications.forEach(notification => notification.remove());
+
+        // Helper function to get authentication token
+        async function getAuthToken() {
+            // First check localStorage for existing token
+            let token = localStorage.getItem('access_token');
             
-            // Create new notification
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
+            // Check if token exists and is not expired
+            if (token && !isTokenExpired(token)) {
+                return token;
+            }
             
-            document.body.appendChild(notification);
+            // If no valid token in localStorage, try to get from Flask session
+            try {
+                const response = await fetch('/api/v1/auth/session-token', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.data && data.data.token) {
+                        // Store token in localStorage for future use
+                        localStorage.setItem('access_token', data.data.token);
+                        return data.data.token;
+                    }
+                }
+            } catch (error) {
+                console.log('Could not fetch session token:', error);
+            }
             
-            // Show notification
+            // Clear expired token from localStorage
+            if (token) {
+                localStorage.removeItem('access_token');
+            }
+            
+            showMessage('Please log in to access this feature', 'error');
+            return null;
+        }
+        
+        // Helper function to check if JWT token is expired
+        function isTokenExpired(token) {
+            try {
+                // Decode JWT token (simple base64 decode of payload)
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const currentTime = Math.floor(Date.now() / 1000);
+                
+                // Check if token has expired (exp claim)
+                return payload.exp && payload.exp < currentTime;
+            } catch (error) {
+                console.log('Error decoding token:', error);
+                return true; // Consider invalid tokens as expired
+            }
+        }
+
+        // Profile update functionality
+        async function updateProfile(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const profileData = {
+                first_name: formData.get('first_name'),
+                last_name: formData.get('last_name'),
+                address: formData.get('address')
+            };
+            
+            // Remove empty fields
+            Object.keys(profileData).forEach(key => {
+                if (!profileData[key] || profileData[key].trim() === '') {
+                    delete profileData[key];
+                }
+            });
+            
+            const token = await getAuthToken();
+            if (!token) return;
+            
+            try {
+                const response = await fetch('/api/v1/auth/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(profileData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage(result.message || 'Profile updated successfully!', 'success');
+                    // Update the form with the returned data
+                    if (result.data && result.data.customer) {
+                        const customer = result.data.customer;
+                        document.getElementById('first_name').value = customer.first_name || '';
+                        document.getElementById('last_name').value = customer.last_name || '';
+                        document.getElementById('address').value = customer.address || '';
+                    }
+                } else {
+                    showMessage(result.message || 'Failed to update profile', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showMessage('Failed to update profile', 'error');
+            }
+        }
+
+        // Password change functionality
+        async function changePassword(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const currentPassword = formData.get('current_password');
+            const newPassword = formData.get('new_password');
+            const confirmPassword = formData.get('confirm_password');
+            
+            if (newPassword !== confirmPassword) {
+                showMessage('New passwords do not match', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showMessage('Password must be at least 6 characters long', 'error');
+                return;
+            }
+            
+            const token = await getAuthToken();
+            if (!token) return;
+            
+            try {
+                const response = await fetch('/api/v1/auth/change-password', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        current_password: currentPassword,
+                        new_password: newPassword
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage(result.message || 'Password changed successfully!', 'success');
+                    event.target.reset();
+                } else {
+                    showMessage(result.message || 'Failed to change password', 'error');
+                }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                showMessage('Failed to change password', 'error');
+            }
+        }
+
+        // Avatar upload functionality
+        async function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showMessage('Please select a valid image file', 'error');
+                return;
+            }
+            
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showMessage('Image size must be less than 5MB', 'error');
+                return;
+            }
+            
+            // Preview the image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('profile-avatar').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            
+            // Upload to server
+            const formData = new FormData();
+            formData.append('profile_avatar', file);
+            
+            const token = await getAuthToken();
+            if (!token) return;
+            
+            try {
+                showMessage('Uploading avatar...', 'info');
+                
+                const response = await fetch('/api/v1/auth/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage(result.message || 'Avatar updated successfully!', 'success');
+                    // Update avatar URL if provided
+                    if (result.data && result.data.customer && result.data.customer.profile_avatar) {
+                        document.getElementById('profile-avatar').src = result.data.customer.profile_avatar;
+                    }
+                } else {
+                    showMessage(result.message || 'Failed to upload avatar', 'error');
+                }
+            } catch (error) {
+                console.error('Error uploading avatar:', error);
+                showMessage('Failed to upload avatar', 'error');
+            }
+        }
+
+        // Load user orders
+        async function loadOrders() {
+            const ordersContent = document.getElementById('orders-content');
+            const ordersLoading = document.getElementById('orders-loading');
+            const ordersList = document.getElementById('orders-list');
+            
+            // Show loading if not already loaded
+            if (ordersContent.style.display === 'none') {
+                ordersLoading.style.display = 'flex';
+                
+                const token = await getAuthToken();
+                if (!token) return;
+                
+                try {
+                    const response = await fetch(`/api/v1/customers/{{ user.id }}/orders`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const orders = await response.json();
+                        displayOrders(orders);
+                    } else {
+                        ordersList.innerHTML = '<div class="empty-state"><i class="fas fa-shopping-cart"></i><h3>No Orders Found</h3><p>You haven\'t placed any orders yet.</p></div>';
+                    }
+                } catch (error) {
+                    console.error('Error loading orders:', error);
+                    ordersList.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error Loading Orders</h3><p>Please try again later.</p></div>';
+                } finally {
+                    ordersLoading.style.display = 'none';
+                    ordersContent.style.display = 'block';
+                }
+            }
+        }
+
+        // Display orders
+        function displayOrders(orders) {
+            const ordersList = document.getElementById('orders-list');
+            
+            if (!orders || orders.length === 0) {
+                ordersList.innerHTML = '<div class="empty-state"><i class="fas fa-shopping-cart"></i><h3>No Orders Found</h3><p>You haven\'t placed any orders yet.</p></div>';
+                return;
+            }
+            
+            ordersList.innerHTML = orders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-id">Order #${order.id}</div>
+                        <div class="order-status status-${order.status.toLowerCase()}">${order.status}</div>
+                        <div class="order-date">${new Date(order.created_at).toLocaleDateString()}</div>
+                        <div class="order-total">$${parseFloat(order.total_amount).toFixed(2)}</div>
+                    </div>
+                    <div class="order-products" id="order-products-${order.id}">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Load products for each order
+            orders.forEach(order => loadOrderProducts(order.id));
+        }
+
+        // Load products for a specific order
+        async function loadOrderProducts(orderId) {
+            const token = await getAuthToken();
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`/api/v1/orders/${orderId}/items`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const items = await response.json();
+                    displayOrderProducts(orderId, items);
+                }
+            } catch (error) {
+                console.error('Error loading order products:', error);
+            }
+        }
+
+        // Display order products
+        function displayOrderProducts(orderId, items) {
+            const container = document.getElementById(`order-products-${orderId}`);
+            
+            if (!items || items.length === 0) {
+                container.innerHTML = '<p>No products found for this order.</p>';
+                return;
+            }
+            
+            container.innerHTML = items.map(item => `
+                <div class="product-item">
+                    <img src="${item.product?.image_url || '/static/images/default-product.png'}" alt="${item.product?.name}" class="product-image">
+                    <div class="product-details">
+                        <div class="product-name">${item.product?.name || 'Product'}</div>
+                        <div class="product-price">$${parseFloat(item.price).toFixed(2)}</div>
+                        <div class="product-quantity">Quantity: ${item.quantity}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load wishlist from API
+        async function loadWishlist() {
+            const wishlistContent = document.getElementById('wishlist-content');
+            const wishlistLoading = document.getElementById('wishlist-loading');
+            const wishlistList = document.getElementById('wishlist-list');
+            
+            // Show loading if not already loaded
+            if (wishlistContent.style.display === 'none') {
+                wishlistLoading.style.display = 'flex';
+                
+                try {
+                    const token = await getAuthToken();
+                    if (!token) return;
+                    
+                    const response = await fetch(`/api/v1/customers/{{ user.id }}/wishlist`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        displayWishlistItems(data.wishlist_items || []);
+                    } else {
+                        const errorData = await response.json();
+                        showMessage(errorData.error || 'Failed to load wishlist', 'error');
+                        wishlistList.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error Loading Wishlist</h3><p>Please try again later.</p></div>';
+                    }
+                } catch (error) {
+                    console.error('Error loading wishlist:', error);
+                    showMessage('Failed to load wishlist', 'error');
+                    wishlistList.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error Loading Wishlist</h3><p>Please try again later.</p></div>';
+                } finally {
+                    wishlistLoading.style.display = 'none';
+                    wishlistContent.style.display = 'block';
+                }
+            }
+        }
+
+        // Display wishlist items
+        function displayWishlistItems(items) {
+            const wishlistList = document.getElementById('wishlist-list');
+            
+            if (items.length === 0) {
+                wishlistList.innerHTML = '<div class="empty-state"><i class="fas fa-heart"></i><h3>Your Wishlist is Empty</h3><p>Add some products to your wishlist to see them here.</p></div>';
+                return;
+            }
+
+            let wishlistHTML = '';
+            items.forEach(item => {
+                const product = item.product;
+                if (product) {
+                    wishlistHTML += `
+                        <div class="wishlist-item" data-product-id="${product.id}">
+                            <img src="${product.product_image || '/static/images/default-product.png'}" alt="${product.name}" class="wishlist-image" onerror="this.src='/static/images/default-product.png'">
+                            <div class="wishlist-name">${product.name}</div>
+                            <div class="wishlist-price">$${parseFloat(product.price).toFixed(2)}</div>
+                            <div class="wishlist-actions">
+                                <button class="btn btn-primary btn-sm" onclick="addToCart('${product.id}')" ${product.stock_quantity <= 0 ? 'disabled' : ''}>
+                                    <i class="fas fa-shopping-cart"></i>
+                                    Add to Cart
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="removeFromWishlist('${product.id}')">
+                                    <i class="fas fa-trash"></i>
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            wishlistList.innerHTML = wishlistHTML;
+        }
+
+        // Remove item from wishlist
+        async function removeFromWishlist(productId) {
+            if (!confirm('Are you sure you want to remove this item from your wishlist?')) {
+                return;
+            }
+
+            try {
+                const token = await getAuthToken();
+                if (!token) return;
+
+                const response = await fetch(`/api/v1/customers/{{ user.id }}/wishlist/${productId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    showMessage('Item removed from wishlist', 'success');
+                    // Remove the item from the display
+                    const wishlistItem = document.querySelector(`[data-product-id="${productId}"]`);
+                    if (wishlistItem) {
+                        wishlistItem.remove();
+                    }
+                    // Check if wishlist is now empty
+                    const remainingItems = document.querySelectorAll('.wishlist-item');
+                    if (remainingItems.length === 0) {
+                        document.getElementById('wishlist-list').innerHTML = '<div class="empty-state"><i class="fas fa-heart"></i><h3>Your Wishlist is Empty</h3><p>Add some products to your wishlist to see them here.</p></div>';
+                    }
+                } else {
+                    const errorData = await response.json();
+                    showMessage(errorData.error || 'Failed to remove item from wishlist', 'error');
+                }
+            } catch (error) {
+                console.error('Error removing from wishlist:', error);
+                showMessage('Failed to remove item from wishlist', 'error');
+            }
+        }
+
+        // Add item to cart (placeholder - implement based on existing cart functionality)
+        async function addToCart(productId) {
+            // This function should integrate with your existing cart API
+            showMessage('Add to cart functionality needs to be implemented', 'info');
+        }
+
+        // Delete account confirmation
+        function confirmDeleteAccount() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.')) {
+                deleteAccount();
+            }
+        }
+
+        // Delete account functionality
+        async function deleteAccount() {
+            const token = await getAuthToken();
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`/api/v1/customers/{{ user.id }}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage(result.message || 'Account deleted successfully', 'success');
+                    // Clear local storage
+                    localStorage.removeItem('auth_token');
+                    sessionStorage.removeItem('auth_token');
+                    setTimeout(() => {
+                        window.location.href = '/auth/logout';
+                    }, 2000);
+                } else {
+                    showMessage(result.message || 'Failed to delete account', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting account:', error);
+                showMessage('Failed to delete account', 'error');
+            }
+        }
+
+        // Load products from API
+        async function loadProducts() {
+            const productsContent = document.getElementById('products-content');
+            const productsLoading = document.getElementById('products-loading');
+            const productsList = document.getElementById('products-list');
+            
+            // Show loading if not already loaded
+            if (productsContent.style.display === 'none') {
+                productsLoading.style.display = 'flex';
+                
+                try {
+                    const token = await getAuthToken();
+                    if (!token) return;
+                    
+                    const response = await fetch(`/api/v1/customers/{{ user.id }}/products`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        displayProducts(data.products || []);
+                        productsLoading.style.display = 'none';
+                        productsContent.style.display = 'block';
+                    } else {
+                        const errorData = await response.json();
+                        showMessage(errorData.error || 'Failed to load products', 'error');
+                        productsLoading.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error loading products:', error);
+                    showMessage('Failed to load products', 'error');
+                    productsLoading.style.display = 'none';
+                }
+            }
+        }
+
+        // Display products in the UI
+        function displayProducts(products) {
+            const productsList = document.getElementById('products-list');
+            
+            if (products.length === 0) {
+                productsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-box"></i>
+                        <h3>No Products Found</h3>
+                        <p>You haven't added any products yet. Start selling by adding your first product!</p>
+                        <a href="/products/add" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Your First Product
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            let productsHTML = '';
+            products.forEach(product => {
+                productsHTML += `
+                    <div class="product-item" data-product-id="${product.id}" onclick="viewProduct('${product.id}')">
+                        <img src="${product.product_image || '/static/images/default-product.png'}" alt="${product.name}" class="product-image" onerror="this.src='/static/images/default-product.png'">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-price">$${parseFloat(product.price).toFixed(2)}</div>
+                        <div class="product-description">${product.description || 'No description available'}</div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); editProduct('${product.id}')">
+                                <i class="fas fa-edit"></i>
+                                Edit
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteProduct('${product.id}', '${product.name}')">
+                                <i class="fas fa-trash"></i>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            productsList.innerHTML = productsHTML;
+        }
+
+        // View product details
+        function viewProduct(productId) {
+            window.location.href = `/product/${productId}`;
+        }
+
+        // Edit product
+        function editProduct(productId) {
+            window.location.href = `/products/edit/${productId}`;
+        }
+
+        // Delete product
+        async function deleteProduct(productId, productName) {
+            if (!confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const token = await getAuthToken();
+                if (!token) return;
+
+                const response = await fetch(`/api/v1/products/${productId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    showMessage('Product deleted successfully', 'success');
+                    // Remove the product from the display
+                    const productItem = document.querySelector(`[data-product-id="${productId}"]`);
+                    if (productItem) {
+                        productItem.remove();
+                    }
+                    // Check if products list is now empty
+                    const remainingProducts = document.querySelectorAll('.product-item');
+                    if (remainingProducts.length === 0) {
+                        document.getElementById('products-list').innerHTML = `
+                            <div class="empty-state">
+                                <i class="fas fa-box"></i>
+                                <h3>No Products Found</h3>
+                                <p>You haven't added any products yet. Start selling by adding your first product!</p>
+                                <a href="/products/add" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Add Your First Product
+                                </a>
+                            </div>
+                        `;
+                    }
+                } else {
+                    const errorData = await response.json();
+                    showMessage(errorData.error || 'Failed to delete product', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showMessage('Failed to delete product', 'error');
+            }
+        }
+
+        // Show message functionality
+        function showMessage(message, type) {
+            // Create message element
+            const messageEl = document.createElement('div');
+            messageEl.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'}`;
+            messageEl.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                animation: slideIn 0.3s ease;
+            `;
+            messageEl.innerHTML = `
+                <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(messageEl);
+            
+            // Remove after 3 seconds
             setTimeout(() => {
-                notification.classList.add('show');
-            }, 100);
-            
-            // Hide notification after 3 seconds
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
+                messageEl.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => messageEl.remove(), 300);
             }, 3000);
         }
+
+        // Add CSS for message animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Logout function to clear localStorage token
+        function logout() {
+            // Clear token from localStorage
+            localStorage.removeItem('access_token');
+            
+            // Redirect to logout route
+            window.location.href = '/logout';
+        }
+        
+        // Initialize token on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Try to get and store token in localStorage if user is logged in
+            try {
+                const response = await fetch('/api/v1/auth/session-token', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.data && data.data.token) {
+                        localStorage.setItem('access_token', data.data.token);
+                        console.log('Token stored in localStorage');
+                    }
+                }
+            } catch (error) {
+                console.log('Could not initialize token:', error);
+            }
+        });
     </script>
 </body>
 </html>
