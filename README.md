@@ -1,10 +1,13 @@
 ## Introduction
 
-![techOnline Logo](https://github.com/Motaz-Mukhtar/techOnline/blob/main/assets/techOnline_Logo.png)\
+![techOnline Logo](https://github.com/Motaz-Mukhtar/techOnline/blob/main/assets/techOnline_Logo.png)
 
 
 E-commerce Online Store that allow users to showcase there tech products,
 you can try it [here](http://web-01.alxweb-01.tech/home) (Not available at the moment).
+
+
+![Landing Page](https://github.com/Motaz-Mukhtar/techOnline/blob/main/assets/landing_page.png)
 
 
 ## Technologies:
