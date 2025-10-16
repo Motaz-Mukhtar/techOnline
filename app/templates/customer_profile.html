@@ -863,7 +863,7 @@
                     method: 'GET',
                     credentials: 'include'
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     if (data.data && data.data.token) {
@@ -882,6 +882,9 @@
             }
             
             showMessage('Please log in to access this feature', 'error');
+
+            // Redirect the user to the login page.
+            setTimeout(() => { window.location.href = '/login'; }, 3000);
             return null;
         }
         
@@ -931,9 +934,8 @@
                     body: JSON.stringify(profileData)
                 });
                 
-                const result = await response.json();
-                
-                if (response.ok) {
+                if (response.status === 200) {
+                    const result = await response.json().catch(() => ({}));
                     showMessage(result.message || 'Profile updated successfully!', 'success');
                     // Update the form with the returned data
                     if (result.data && result.data.customer) {
@@ -942,12 +944,25 @@
                         document.getElementById('last_name').value = customer.last_name || '';
                         document.getElementById('address').value = customer.address || '';
                     }
+                } else if (response.status === 400) {
+                    const result = await response.json().catch(() => ({}));
+                    showMessage(result.message || 'Invalid profile data. Please check your inputs.', 'error');
+                } else if (response.status === 401) {
+                    showMessage('Your session has expired. Please log in again.', 'error');
+                    setTimeout(() => {
+                        window.location.href = '/auth/login';
+                    }, 2000);
+                } else if (response.status === 404) {
+                    showMessage('User profile not found. Please refresh the page.', 'error');
+                } else if (response.status >= 500) {
+                    showMessage('Server error. Please try again later.', 'error');
                 } else {
+                    const result = await response.json().catch(() => ({}));
                     showMessage(result.message || 'Failed to update profile', 'error');
                 }
             } catch (error) {
                 console.error('Error updating profile:', error);
-                showMessage('Failed to update profile', 'error');
+                showMessage('Network error. Please check your connection and try again.', 'error');
             }
         }
 
@@ -986,17 +1001,34 @@
                     })
                 });
                 
-                const result = await response.json();
-                
-                if (response.ok) {
+                if (response.status === 200) {
+                    const result = await response.json().catch(() => ({}));
                     showMessage(result.message || 'Password changed successfully!', 'success');
                     event.target.reset();
+                } else if (response.status === 400) {
+                    const result = await response.json().catch(() => ({}));
+                    showMessage(result.message || 'Invalid password data. Please check your inputs.', 'error');
+                } else if (response.status === 401) {
+                    const result = await response.json().catch(() => ({}));
+                    if (result.message && result.message.includes('current password')) {
+                        showMessage('Current password is incorrect.', 'error');
+                    } else {
+                        showMessage('Your session has expired. Please log in again.', 'error');
+                        setTimeout(() => {
+                            window.location.href = '/auth/login';
+                        }, 2000);
+                    }
+                } else if (response.status === 404) {
+                    showMessage('User account not found. Please refresh the page.', 'error');
+                } else if (response.status >= 500) {
+                    showMessage('Server error. Please try again later.', 'error');
                 } else {
+                    const result = await response.json().catch(() => ({}));
                     showMessage(result.message || 'Failed to change password', 'error');
                 }
             } catch (error) {
                 console.error('Error changing password:', error);
-                showMessage('Failed to change password', 'error');
+                showMessage('Network error. Please check your connection and try again.', 'error');
             }
         }
 
@@ -1029,6 +1061,7 @@
             formData.append('profile_avatar', file);
             
             const token = await getAuthToken();
+            console.log(token);
             if (!token) return;
             
             try {
@@ -1070,7 +1103,7 @@
                 ordersLoading.style.display = 'flex';
                 
                 const token = await getAuthToken();
-                if (!token) return;
+                // if (!token) return;
                 
                 try {
                     const response = await fetch(`/api/v1/customers/{{ user.id }}/orders`, {
@@ -1176,7 +1209,7 @@
                 
                 try {
                     const token = await getAuthToken();
-                    if (!token) return;
+                    // if (!token) return;
                     
                     const response = await fetch(`/api/v1/customers/{{ user.id }}/wishlist`, {
                         method: 'GET',
@@ -1307,9 +1340,8 @@
                     }
                 });
                 
-                const result = await response.json();
-                
-                if (response.ok) {
+                if (response.status === 200 || response.status === 204) {
+                    const result = await response.json().catch(() => ({}));
                     showMessage(result.message || 'Account deleted successfully', 'success');
                     // Clear local storage
                     localStorage.removeItem('auth_token');
@@ -1317,12 +1349,25 @@
                     setTimeout(() => {
                         window.location.href = '/auth/logout';
                     }, 2000);
+                } else if (response.status === 404) {
+                    showMessage('Account not found. Please refresh the page and try again.', 'error');
+                } else if (response.status === 403) {
+                    const result = await response.json().catch(() => ({}));
+                    showMessage(result.message || 'You do not have permission to delete this account', 'error');
+                } else if (response.status === 401) {
+                    showMessage('Your session has expired. Please log in again.', 'error');
+                    setTimeout(() => {
+                        window.location.href = '/auth/login';
+                    }, 2000);
+                } else if (response.status >= 500) {
+                    showMessage('Server error. Please try again later.', 'error');
                 } else {
+                    const result = await response.json().catch(() => ({}));
                     showMessage(result.message || 'Failed to delete account', 'error');
                 }
             } catch (error) {
                 console.error('Error deleting account:', error);
-                showMessage('Failed to delete account', 'error');
+                showMessage('Network error. Please check your connection and try again.', 'error');
             }
         }
 
@@ -1338,7 +1383,7 @@
                 
                 try {
                     const token = await getAuthToken();
-                    if (!token) return;
+                    // if (!token) return;
                     
                     const response = await fetch(`/api/v1/customers/{{ user.id }}/products`, {
                         method: 'GET',
@@ -1348,19 +1393,37 @@
                         }
                     });
                     
-                    if (response.ok) {
+                    if (response.status === 200) {
                         const data = await response.json();
                         displayProducts(data.products || []);
                         productsLoading.style.display = 'none';
                         productsContent.style.display = 'block';
+                    } else if (response.status === 404) {
+                        showMessage('No products found for this user.', 'error');
+                        displayProducts([]);
+                        productsLoading.style.display = 'none';
+                        productsContent.style.display = 'block';
+                    } else if (response.status === 401) {
+                        showMessage('Your session has expired. Please log in again.', 'error');
+                        productsLoading.style.display = 'none';
+                        setTimeout(() => {
+                            window.location.href = '/auth/login';
+                        }, 2000);
+                    } else if (response.status === 403) {
+                        const errorData = await response.json().catch(() => ({}));
+                        showMessage(errorData.error || 'You do not have permission to view these products', 'error');
+                        productsLoading.style.display = 'none';
+                    } else if (response.status >= 500) {
+                        showMessage('Server error. Please try again later.', 'error');
+                        productsLoading.style.display = 'none';
                     } else {
-                        const errorData = await response.json();
+                        const errorData = await response.json().catch(() => ({}));
                         showMessage(errorData.error || 'Failed to load products', 'error');
                         productsLoading.style.display = 'none';
                     }
                 } catch (error) {
                     console.error('Error loading products:', error);
-                    showMessage('Failed to load products', 'error');
+                    showMessage('Network error. Please check your connection and try again.', 'error');
                     productsLoading.style.display = 'none';
                 }
             }
@@ -1437,7 +1500,7 @@
                     }
                 });
 
-                if (response.ok) {
+                if (response.status === 200 || response.status === 204) {
                     showMessage('Product deleted successfully', 'success');
                     // Remove the product from the display
                     const productItem = document.querySelector(`[data-product-id="${productId}"]`);
@@ -1458,13 +1521,25 @@
                             </div>
                         `;
                     }
+                } else if (response.status === 404) {
+                    showMessage('Product not found. It may have been already deleted.', 'error');
+                } else if (response.status === 403) {
+                    const errorData = await response.json().catch(() => ({}));
+                    showMessage(errorData.error || 'You do not have permission to delete this product', 'error');
+                } else if (response.status === 401) {
+                    showMessage('Your session has expired. Please log in again.', 'error');
+                    setTimeout(() => {
+                        window.location.href = '/auth/login';
+                    }, 2000);
+                } else if (response.status >= 500) {
+                    showMessage('Server error. Please try again later.', 'error');
                 } else {
-                    const errorData = await response.json();
+                    const errorData = await response.json().catch(() => ({}));
                     showMessage(errorData.error || 'Failed to delete product', 'error');
                 }
             } catch (error) {
                 console.error('Error deleting product:', error);
-                showMessage('Failed to delete product', 'error');
+                showMessage('Network error. Please check your connection and try again.', 'error');
             }
         }
 
