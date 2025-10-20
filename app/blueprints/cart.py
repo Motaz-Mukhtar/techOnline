@@ -7,7 +7,7 @@ This module contains all cart-related endpoints including:
 - Remove items from cart
 """
 
-from flask import Blueprint, render_template, request, jsonify, flash
+from flask import Blueprint, render_template, request, jsonify, flash, session
 from flask_login import login_required, current_user
 from modules import storage
 from modules.Cart.cart import Cart
@@ -70,7 +70,8 @@ def cart():
         return render_template('cart.html', cart=cart_obj,
                                             items=items,
                                             total=total,
-                                            cart_item_count=cart_item_count)
+                                            cart_item_count=cart_item_count,
+                                            access_token=session.get('access_token'))
     except Exception as e:
         flash(f'Failed to load cart: {str(e)}', 'error')
         return render_template('cart.html', cart=None, items=[], total=0.0)

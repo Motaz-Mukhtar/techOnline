@@ -7,6 +7,7 @@ from modules.Order.order import Order
 from modules.Order.order_item import OrderItem
 from modules.Products.product import Product
 from modules.Review.review import Review
+from modules.Wishlist.wishlist import Wishlist
 from modules.baseModel import Base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
@@ -46,6 +47,7 @@ class DBStorage:
             obj.extend(self.__session.query(Product).all())
             obj.extend(self.__session.query(Cart).all())
             obj.extend(self.__session.query(CartItem).all())
+            obj.extend(self.__session.query(Wishlist).all())
         else:
             if type(cls) == str:
                 cls = eval(cls)

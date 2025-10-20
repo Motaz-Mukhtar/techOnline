@@ -3,7 +3,7 @@
 Shop Blueprint - Handles shop browsing and product search functionality.
 """
 
-from flask import Blueprint, render_template, request, flash, current_app
+from flask import Blueprint, render_template, request, flash, session
 from flask_login import login_required, current_user
 from modules.Products.product import Product
 from modules.Category.category import Category
@@ -74,11 +74,11 @@ def shop():
                         
                         matching_products.append(ProductProxy(product_dict))
                     
-                    return render_template('layout.html', products=matching_products, search_query=product_name, cart_item_count=cart_item_count)
+                    return render_template('shop.html', products=matching_products, search_query=product_name, cart_item_count=cart_item_count)
                 else:
                     flash(f'Error fetching search results: {response.status_code}', 'error')
                     # Fallback to empty results
-                    return render_template('layout.html', products=[], search_query=product_name, cart_item_count=cart_item_count)
+                    return render_template('shop.html', products=[], search_query=product_name, cart_item_count=cart_item_count)
             else:
                 # If no search query, get all products from API
                 api_url = 'http://127.0.0.1:5001/api/v1/products'
@@ -105,11 +105,11 @@ def shop():
                         
                         products_list.append(ProductProxy(product_dict))
                     
-                    return render_template('layout.html', products=products_list, cart_item_count=cart_item_count)
+                    return render_template('shop.html', products=products_list, cart_item_count=cart_item_count)
                 else:
                     print("Error")
                     flash(f'Error fetching products: {response.status_code}', 'error')
-                    return render_template('layout.html', products=[], cart_item_count=cart_item_count)
+                    return render_template('shop.html', products=[], cart_item_count=cart_item_count)
         
         # GET request - get all products from API
         api_url = 'http://127.0.0.1:5001/api/v1/products'
@@ -136,16 +136,28 @@ def shop():
                 
                 products_list.append(ProductProxy(product_dict))
             
-            return render_template('layout.html', products=products_list, cart_item_count=cart_item_count)
+            return render_template('shop.html',
+                                   products=products_list,
+                                   cart_item_count=cart_item_count,
+                                   access_token=session.get('access_token'))
         else:
             flash(f'Error fetching products: {response.status_code}', 'error')
-            return render_template('layout.html', products=[], cart_item_count=cart_item_count)
+            return render_template('shop.html',
+                                   products=[],
+                                   cart_item_count=cart_item_count,
+                                   access_token=session.get('access_token'))
             
     except requests.exceptions.RequestException as e:
         flash(f'API connection error: {str(e)}', 'error')
         # Fallback to direct database access if API is unavailable
         products_list = list(storage.all(Product).values())
-        return render_template('layout.html', products=products_list, cart_item_count=cart_item_count)
+        return render_template('shop.html',
+                               products=products_list,
+                               cart_item_count=cart_item_count,
+                               access_token=session.get('access_token'))
     except Exception as e:
         flash(f'Unexpected error: {str(e)}', 'error')
-        return render_template('layout.html', products=[], cart_item_count=cart_item_count)
+        return render_template('shop.html',
+                               products=[],
+                               cart_item_count=cart_item_count,
+                               access_token=session.get('access_token'))

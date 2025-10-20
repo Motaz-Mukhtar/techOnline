@@ -431,8 +431,10 @@
         
         /* Wishlist Section Styles */
         .wishlist-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            /* display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); */
+            display: flex;
+            justify-content: space-around;
             gap: 1.5rem;
         }
         
@@ -485,6 +487,7 @@
         }
         
         .product-item {
+            flex-wrap: wrap;
             background: #f8f9fa;
             border-radius: 15px;
             padding: 1.5rem;
@@ -556,6 +559,10 @@
         .empty-state h3 {
             margin-bottom: 0.5rem;
             color: #333;
+        }
+
+        .empty-state p {
+            margin: 20px 0px;
         }
         
         /* Loading Animation */
@@ -849,38 +856,11 @@
 
         // Helper function to get authentication token
         async function getAuthToken() {
-            // First check localStorage for existing token
-            let token = localStorage.getItem('access_token');
-            
-            // Check if token exists and is not expired
-            if (token && !isTokenExpired(token)) {
-                return token;
-            }
-            
-            // If no valid token in localStorage, try to get from Flask session
-            try {
-                const response = await fetch('/api/v1/auth/session-token', {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.data && data.data.token) {
-                        // Store token in localStorage for future use
-                        localStorage.setItem('access_token', data.data.token);
-                        return data.data.token;
-                    }
-                }
-            } catch (error) {
-                console.log('Could not fetch session token:', error);
-            }
-            
             // Clear expired token from localStorage
-            if (token) {
-                localStorage.removeItem('access_token');
-            }
-            
+            const token = "{{access_token}}";
+            if (token)
+                return token;
+
             showMessage('Please log in to access this feature', 'error');
 
             // Redirect the user to the login page.
@@ -1106,14 +1086,14 @@
                 // if (!token) return;
                 
                 try {
-                    const response = await fetch(`/api/v1/customers/{{ user.id }}/orders`, {
+                    const response = await fetch(`http://localhost:5001/api/v1/customers/{{ user.id }}/orders`, {
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }
                     });
                     
                     if (response.ok) {
-                        const orders = await response.json();
+                        const { orders } = await response.json();
                         displayOrders(orders);
                     } else {
                         ordersList.innerHTML = '<div class="empty-state"><i class="fas fa-shopping-cart"></i><h3>No Orders Found</h3><p>You haven\'t placed any orders yet.</p></div>';
@@ -1131,12 +1111,12 @@
         // Display orders
         function displayOrders(orders) {
             const ordersList = document.getElementById('orders-list');
-            
+
             if (!orders || orders.length === 0) {
                 ordersList.innerHTML = '<div class="empty-state"><i class="fas fa-shopping-cart"></i><h3>No Orders Found</h3><p>You haven\'t placed any orders yet.</p></div>';
                 return;
             }
-            
+
             ordersList.innerHTML = orders.map(order => `
                 <div class="order-card">
                     <div class="order-header">
@@ -1161,7 +1141,7 @@
             if (!token) return;
             
             try {
-                const response = await fetch(`/api/v1/orders/${orderId}/items`, {
+                const response = await fetch(`http://localhost:5001/api/v1/orders/${orderId}/items`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -1187,7 +1167,7 @@
             
             container.innerHTML = items.map(item => `
                 <div class="product-item">
-                    <img src="${item.product?.image_url || '/static/images/default-product.png'}" alt="${item.product?.name}" class="product-image">
+                    <img src="http://localhost:5001${item.product?.image_url || '/static/images/default-product.png'}" alt="${item.product?.name}" class="product-image">
                     <div class="product-details">
                         <div class="product-name">${item.product?.name || 'Product'}</div>
                         <div class="product-price">$${parseFloat(item.price).toFixed(2)}</div>
@@ -1211,7 +1191,7 @@
                     const token = await getAuthToken();
                     // if (!token) return;
                     
-                    const response = await fetch(`/api/v1/customers/{{ user.id }}/wishlist`, {
+                    const response = await fetch(`http://localhost:5001/api/v1/customers/{{ user.id }}/wishlist`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -1253,8 +1233,8 @@
                 if (product) {
                     wishlistHTML += `
                         <div class="wishlist-item" data-product-id="${product.id}">
-                            <img src="${product.product_image || '/static/images/default-product.png'}" alt="${product.name}" class="wishlist-image" onerror="this.src='/static/images/default-product.png'">
-                            <div class="wishlist-name">${product.name}</div>
+                            <img src="http://localhost:5001${product.product_image || '/static/images/default-product.png'}" alt="${product.product_name}" class="wishlist-image" onerror="this.src='/static/images/default-product.png'">
+                            <div class="wishlist-name">${product.product_name}</div>
                             <div class="wishlist-price">$${parseFloat(product.price).toFixed(2)}</div>
                             <div class="wishlist-actions">
                                 <button class="btn btn-primary btn-sm" onclick="addToCart('${product.id}')" ${product.stock_quantity <= 0 ? 'disabled' : ''}>
@@ -1284,7 +1264,7 @@
                 const token = await getAuthToken();
                 if (!token) return;
 
-                const response = await fetch(`/api/v1/customers/{{ user.id }}/wishlist/${productId}`, {
+                const response = await fetch(`http://localhost:5001/api/v1/customers/{{ user.id }}/wishlist/${productId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -1333,7 +1313,7 @@
             if (!token) return;
             
             try {
-                const response = await fetch(`/api/v1/customers/{{ user.id }}`, {
+                const response = await fetch(`http://localhost:5001/api/v1/customers/{{ user.id }}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -1385,7 +1365,7 @@
                     const token = await getAuthToken();
                     // if (!token) return;
                     
-                    const response = await fetch(`/api/v1/customers/{{ user.id }}/products`, {
+                    const response = await fetch(`http://localhost:5001/api/v1/customers/{{ user.id }}/products`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -1439,7 +1419,7 @@
                         <i class="fas fa-box"></i>
                         <h3>No Products Found</h3>
                         <p>You haven't added any products yet. Start selling by adding your first product!</p>
-                        <a href="/products/add" class="btn btn-primary">
+                        <a href="/product_form" class="btn btn-primary">
                             <i class="fas fa-plus"></i> Add Your First Product
                         </a>
                     </div>
@@ -1451,16 +1431,19 @@
             products.forEach(product => {
                 productsHTML += `
                     <div class="product-item" data-product-id="${product.id}" onclick="viewProduct('${product.id}')">
-                        <img src="${product.product_image || '/static/images/default-product.png'}" alt="${product.name}" class="product-image" onerror="this.src='/static/images/default-product.png'">
-                        <div class="product-name">${product.name}</div>
-                        <div class="product-price">$${parseFloat(product.price).toFixed(2)}</div>
-                        <div class="product-description">${product.description || 'No description available'}</div>
+                        <img src="http://localhost:5001${product.product_image || '/static/images/default-product.png'}" alt="${product.product_name}" class="product-image" onerror="this.src='/static/images/default-product.png'">
+                        <div class="product-name">${product.product_name}</div>
+                        <div class="product-price"><span>$${parseFloat(product.price).toFixed(2)}</span></div>
+                        </br>
+                        <div class="product-description">
+                            <p>${product.description || 'No description available'}</p>
+                        </div>
                         <div class="product-actions">
                             <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); editProduct('${product.id}')">
                                 <i class="fas fa-edit"></i>
                                 Edit
                             </button>
-                            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteProduct('${product.id}', '${product.name}')">
+                            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteProduct('${product.id}', '${product.product_name}')">
                                 <i class="fas fa-trash"></i>
                                 Delete
                             </button>
@@ -1479,7 +1462,7 @@
 
         // Edit product
         function editProduct(productId) {
-            window.location.href = `/products/edit/${productId}`;
+            window.location.href = `/product_form/${productId}`;
         }
 
         // Delete product
@@ -1492,7 +1475,7 @@
                 const token = await getAuthToken();
                 if (!token) return;
 
-                const response = await fetch(`/api/v1/products/${productId}`, {
+                const response = await fetch(`http://localhost:5001/api/v1/products/${productId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -1515,7 +1498,7 @@
                                 <i class="fas fa-box"></i>
                                 <h3>No Products Found</h3>
                                 <p>You haven't added any products yet. Start selling by adding your first product!</p>
-                                <a href="/products/add" class="btn btn-primary">
+                                <a href="/product_form" class="btn btn-primary">
                                     <i class="fas fa-plus"></i> Add Your First Product
                                 </a>
                             </div>
@@ -1588,33 +1571,13 @@
         
         // Logout function to clear localStorage token
         function logout() {
-            // Clear token from localStorage
-            localStorage.removeItem('access_token');
+            // // Clear token from localStorage
+            // localStorage.removeItem('access_token');
             
             // Redirect to logout route
             window.location.href = '/logout';
         }
         
-        // Initialize token on page load
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Try to get and store token in localStorage if user is logged in
-            try {
-                const response = await fetch('/api/v1/auth/session-token', {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.data && data.data.token) {
-                        localStorage.setItem('access_token', data.data.token);
-                        console.log('Token stored in localStorage');
-                    }
-                }
-            } catch (error) {
-                console.log('Could not initialize token:', error);
-            }
-        });
     </script>
 </body>
 </html>

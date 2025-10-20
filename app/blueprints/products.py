@@ -171,7 +171,7 @@ def product_form(product_id=None):
     
     # Check for product_id from URL path or query parameter
     edit_product_id = product_id or request.args.get('edit')
-    
+
     if edit_product_id:
         # Try to get product from API first
         try:
@@ -303,10 +303,12 @@ def product_details(product_id):
 
         return render_template('product_details.html', product=product_data,
                                                        cart_item_count=cart_item_count,
+                                                       cart_id=cart.id,
                                                        seller=seller_info,
                                                        category_name=category_name,
                                                        reviews=reviews,
-                                                       has_reviewed=has_reviewed)
+                                                       has_reviewed=has_reviewed,
+                                                       access_token=session.get('access_token'))
 
     except requests.exceptions.RequestException:
         # Network/API error: use storage fallback

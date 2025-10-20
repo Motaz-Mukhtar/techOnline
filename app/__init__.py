@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-from flask import Flask, make_response, jsonify, abort
+from flask import Flask
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager
-from modules import storage
+from flask_wtf .csrf import CSRFProtect
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY']='dsierjsdfksdofip'
+
+app.secret_key = "lskdjflkdsjf_sldkfjlksdjf"
+
+csrf = CSRFProtect(app)
 
 bcrypt = Bcrypt(app)
 

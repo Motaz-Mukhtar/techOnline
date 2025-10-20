@@ -1,0 +1,17 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# VS Code
+.vscode/
+
+# venv
+projectvenv/
+
+# Database
+db/techOnlineDB.db
+
+# Uploads
+/api/v1/static/uploads/
+/app/static/uploads/

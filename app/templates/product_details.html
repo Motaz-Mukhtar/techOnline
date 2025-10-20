@@ -129,7 +129,8 @@
                                     You have already submitted a review for this product.
                                 </div>
                             {% else %}
-                                <form action="{{ url_for('create_product_review', product_id=product.id) }}" method="POST" class="bg-background border rounded-lg p-4 space-y-4">
+                                <form method="POST" action="{{ url_for('products.create_product_review', product_id=product.id) }}" class="bg-background border rounded-lg p-4 space-y-4">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <div>
                                         <label for="rating" class="block font-semibold mb-1">Rating</label>
                                         <select name="rating" id="rating" class="form-control" required>
@@ -177,17 +178,47 @@
             }
         })();
 
+        // Show message functionality
+        function showMessage(message, type) {
+            // Create message element
+            const messageEl = document.createElement('div');
+            messageEl.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'}`;
+            messageEl.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                animation: slideIn 0.3s ease;
+            `;
+            messageEl.innerHTML = `
+                <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(messageEl);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                messageEl.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => messageEl.remove(), 300);
+            }, 3000);
+        }
+
+
         // Function to get JWT token from session
         async function getJWTToken() {
-            try {
-                const tokenRes = await fetch('/api/token');
-                if (tokenRes.ok) {
-                    const tokenData = await tokenRes.json();
-                    return tokenData.success ? tokenData.access_token : null;
-                }
-            } catch (error) {
-                console.error('Error getting JWT token:', error);
-            }
+            const token = "{{access_token}}";
+
+            if (token)
+                return token;
+            
+            showMessage('Please log in to access this feature', 'error');
+
+            // Redirect the user to the login page.
+            setTimeout(() => { window.location.href = '/login'; }, 3000);
             return null;
         }
         
@@ -203,7 +234,7 @@
                     headers['Authorization'] = `Bearer ${token}`;
                 }
                 
-                const res = await fetch('/api/v1/cart/count', {
+                const res = await fetch('http://localhost:5001/api/v1/cart/count', {
                     method: 'GET',
                     headers: headers
                 });
@@ -238,9 +269,16 @@
 
         async function addToCartServer(prod) {
             try {
-                const res = await fetch('/cart/add', {
+                const cart_id = '{{cart_id}}';
+                console.log(cart_id)
+                const token = await getJWTToken();
+
+                const res = await fetch(`http://localhost:5001/api/v1/carts/${cart_id}/add_product`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
                     body: JSON.stringify({ product_id: prod.id, quantity: 1 })
                 });
                 const data = await res.json();

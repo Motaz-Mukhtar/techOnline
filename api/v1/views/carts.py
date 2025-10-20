@@ -116,10 +116,10 @@ def add_product_to_cart(cart_id):
         JSON response with updated cart data or error message
     """
     cart = storage.get(Cart, cart_id)
-    
+
     if not cart:
         return make_response(jsonify({"error": "Cart not found"}), 404)
-    
+
     # Check if user can modify this cart
     current_user_id = get_current_user_id()
     if not is_admin() and cart.customer_id != current_user_id:
@@ -127,7 +127,7 @@ def add_product_to_cart(cart_id):
     
     if not request.get_json():
         return make_response(jsonify({"error": "Not a JSON"}), 400)
-    
+
     data = request.get_json()
     
     # Validate required fields
@@ -157,8 +157,10 @@ def add_product_to_cart(cart_id):
         }), 200)
         
     except ValueError as e:
+        print(e)
         return make_response(jsonify({"error": str(e)}), 400)
     except Exception as e:
+        print(e)
         return make_response(jsonify({"error": f"Failed to add product to cart: {str(e)}"}), 500)
 
 

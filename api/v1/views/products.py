@@ -173,7 +173,7 @@ def modify_product(product_id):
             
             # Validate product data using BusinessRuleValidator
             validator = BusinessRuleValidator()
-            validation_result = validator.validate_product_data(data, db_session=storage)
+            validation_result = validator.validate_product_data(data)
             
             if not validation_result['valid']:
                 field_errors = error_handler.create_field_errors_dict(validation_result)
@@ -299,6 +299,7 @@ def modify_product(product_id):
             )
     
     except Exception as e:
+        print(e)
         return error_handler.system_error_response(
             message="Failed to modify product",
             error_details=str(e)

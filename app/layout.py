@@ -67,19 +67,5 @@ def img_url(product_id):
         return '/static/images/default-product.jpg'
 
 
-
-@app.route('/test', methods=['GET'], strict_slashes=False)
-@login_required
-def tdddest():
-    data = []
-    try:
-        products_list = requests.get('http://127.0.0.1:5001/api/v1/products')
-        for i in json.loads(products_list.text):
-            data.append(i)
-    except HTTPError:
-        products_list = []
-    return render_template('test.html', data=data)
-
-
 # Old Base64 image serving endpoint removed - now using direct file serving
 

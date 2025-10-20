@@ -555,6 +555,7 @@
                 </div>
                 
                 <form id="productForm" action="{% if existing_product and is_editing %}{{ url_for('products.product_form', product_id=existing_product.id) }}{% else %}{{ url_for('products.product_form') }}{% endif %}" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     {% if existing_product and is_editing %}
                     <input type="hidden" name="_method" value="PUT">
                     <input type="hidden" name="product_id" value="{{ existing_product.id }}">
@@ -770,7 +771,7 @@
                     const productImageInput = document.getElementById('productImage');
                     
                     if (imagePreview && previewImage && fileUploadContainer) {
-                        previewImage.src = existingProduct.product_image;
+                        previewImage.src = `http://localhost:5001${existingProduct.product_image}`;
                         imagePreview.style.display = 'block';
                         fileUploadContainer.style.display = 'none';
                         // Make image upload optional for editing
@@ -958,9 +959,10 @@
                     
                     // Simulate form submission delay
                     setTimeout(() => {
-                        showNotification('Product updated successfully!', 'success');
                         // In real implementation, submit the form
                         form.submit();
+
+                        showNotification('Product updated successfully!', 'success');
                         
                         // Reset form for demo
                         setTimeout(() => {
